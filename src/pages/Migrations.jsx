@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import Card from '../components/Card.jsx'
 import DataTable from '../components/DataTable.jsx'
 import { getMigrations } from '../lib/api.js'

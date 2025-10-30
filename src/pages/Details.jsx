@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import Card from '../components/Card.jsx'
 import KPI from '../components/KPI.jsx'

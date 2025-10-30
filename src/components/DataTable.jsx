@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import React, { useMemo, useState } from 'react'
 
 export default function DataTable({ columns, data, defaultSort, onRowClick, rowAction }) {
   const [sort, setSort] = useState(defaultSort || null)

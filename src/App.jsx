@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import React, { useEffect } from 'react'
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom'
 import Sidebar from './components/Sidebar.jsx'
 import NavBar from './components/NavBar.jsx'

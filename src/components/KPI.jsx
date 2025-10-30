@@ -1,3 +1,5 @@
+import React from 'react'
+
 export default function KPI({ label, value }) {
   return (
     <div className="p-4 rounded-xl bg-slate-50 border border-slate-200">
