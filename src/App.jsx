@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom'
 import Sidebar from './components/Sidebar.jsx'
 import NavBar from './components/NavBar.jsx'
@@ -31,6 +32,9 @@ function AppLayout({ children }) {
 }
 
 export default function App() {
+  useEffect(() => {
+    console.log('[MH-UI] App mounted')
+  }, [])
   return (
     <AppLayout>
       <Routes>
