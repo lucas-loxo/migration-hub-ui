@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from 'react'
 
-export default function DataTable({ columns, data, defaultSort, onRowClick, rowAction }) {
+export default function DataTable({ columns, data, defaultSort, onRowClick, rowAction, stickyHeader = true, zebra = true }) {
   const [sort, setSort] = useState(defaultSort || null)
 
   const sortedData = useMemo(() => {
@@ -34,7 +34,7 @@ export default function DataTable({ columns, data, defaultSort, onRowClick, rowA
               <th
                 key={col.id}
                 onClick={() => setSortBy(col.id, col.sortable)}
-                className={`text-left text-slate-600 text-sm font-medium px-4 py-3 ${
+                className={`text-left text-slate-600 text-sm font-medium px-4 py-3 ${stickyHeader ? 'sticky top-0 bg-slate-50 z-10' : ''} ${
                   col.sortable ? 'cursor-pointer select-none' : ''
                 }`}
               >
@@ -50,11 +50,11 @@ export default function DataTable({ columns, data, defaultSort, onRowClick, rowA
           </tr>
         </thead>
         <tbody>
-          {sortedData.map((row) => (
+          {sortedData.map((row, idx) => (
             <tr
               key={row.id || row.MigrationID}
               onClick={() => onRowClick && onRowClick(row)}
-              className={`border-t border-slate-100 hover:bg-slate-50 ${
+              className={`border-t border-slate-100 ${zebra ? (idx % 2 === 0 ? 'bg-white' : 'bg-slate-50/30') : ''} hover:bg-slate-50 ${
                 onRowClick ? 'cursor-pointer' : ''
               }`}
             >

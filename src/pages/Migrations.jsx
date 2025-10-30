@@ -10,7 +10,7 @@ export default function Migrations() {
   const [q, setQ] = useState('')
 
   useEffect(() => {
-    console.log('[MH-UI] Mount Migrations')
+    console.log('[MH-UI] All Migrations loaded')
     ;(async () => {
       try {
         const data = await getMigrations()
@@ -21,37 +21,48 @@ export default function Migrations() {
     })()
   }, [])
 
+  const normalized = useMemo(() => {
+    return items.map((m) => ({
+      id: m.MigrationID || m.migrationId || m.CustomerID || m.customerId || Math.random().toString(36).slice(2),
+      migrationId: m.migrationId ?? m.MigrationID ?? '—',
+      customerId: m.customerId ?? m.CustomerID ?? '—',
+      customer: m.customer ?? m.Customer ?? '—',
+      stage: m.stage ?? m.Stage ?? '—',
+      daysInStage: m.daysInStage ?? m.Days ?? '—',
+      status: m.status ?? m.Status ?? '—',
+      owner: m.owner ?? m.Owner ?? '—',
+      githubStatus: m.githubStatus ?? '—',
+      _raw: m,
+    }))
+  }, [items])
+
   const filtered = useMemo(() => {
     const needle = q.trim().toLowerCase()
-    const list = items.map((r) => ({ ...r, id: r.MigrationID }))
+    const list = normalized
     const searched = needle
       ? list.filter(
           (r) =>
-            r.Customer.toLowerCase().includes(needle) ||
-            String(r.MigrationID).toLowerCase().includes(needle),
+            String(r.customer).toLowerCase().includes(needle) ||
+            String(r.migrationId).toLowerCase().includes(needle),
         )
       : list
     // default sort by Customer asc
-    return [...searched].sort((a, b) => a.Customer.localeCompare(b.Customer))
-  }, [items, q])
+    return [...searched].sort((a, b) => String(a.customer).localeCompare(String(b.customer)))
+  }, [normalized, q])
 
   const columns = [
-    { id: 'MigrationID', header: 'MigrationID', sortable: true },
-    { id: 'Customer', header: 'Customer', sortable: true },
-    { id: 'Stage', header: 'Stage', sortable: true },
-    { id: 'Status', header: 'Status', sortable: true },
-    { id: 'Owner', header: 'Owner', sortable: true },
-    {
-      id: 'GitHubLink',
-      header: 'GitHub',
-      sortable: false,
-      cell: (v) => (
-        <a className="text-sky-600 underline" href={v} target="_blank" rel="noreferrer">
-          Link
-        </a>
-      ),
-    },
-    { id: 'Days', header: 'Days', sortable: true },
+    { id: 'migrationId', header: 'Migration ID', sortable: true, cell: (v, row) => (
+      <a className="text-sky-700 hover:underline" href={`#/details/${row.migrationId}`} onClick={(e) => { e.preventDefault(); navigate(`/details/${row.migrationId}`) }}>{v}</a>
+    ) },
+    { id: 'customerId', header: 'Customer ID', sortable: true },
+    { id: 'customer', header: 'Customer', sortable: true, cell: (v, row) => (
+      <a className="text-sky-700 hover:underline" href={`#/details/${row.migrationId}`} onClick={(e) => { e.preventDefault(); navigate(`/details/${row.migrationId}`) }}>{v}</a>
+    ) },
+    { id: 'stage', header: 'Stage', sortable: true },
+    { id: 'daysInStage', header: 'Days in Stage', sortable: true },
+    { id: 'status', header: 'Status', sortable: true },
+    { id: 'owner', header: 'Owner', sortable: true },
+    { id: 'githubStatus', header: 'GitHub Status', sortable: false },
   ]
 
   return (
@@ -60,15 +71,17 @@ export default function Migrations() {
         <input
           value={q}
           onChange={(e) => setQ(e.target.value)}
-          placeholder="Search by Customer or MigrationID"
-          className="w-full md:w-80 rounded-xl border-slate-300 text-sm"
+          placeholder="Search by Customer or Migration ID"
+          className="w-full md:w-96 border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 bg-white text-gray-800 placeholder:text-gray-400"
         />
       </div>
       <Card className="p-4">
         <DataTable
           columns={columns}
           data={filtered}
-          onRowClick={(row) => navigate(`/details/${row.MigrationID}`)}
+          onRowClick={(row) => navigate(`/details/${row.migrationId || row._raw?.MigrationID}`)}
+          stickyHeader
+          zebra
         />
       </Card>
     </div>
