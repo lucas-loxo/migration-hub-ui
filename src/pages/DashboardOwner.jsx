@@ -1,14 +1,17 @@
 import React, { useEffect, useMemo, useState } from 'react'
 import Card from '../components/Card.jsx'
 import DataTable from '../components/DataTable.jsx'
-import { getMigrations, getStagePerformance } from '../lib/api.js'
+import { getMigrations as getSheetMigrations } from '../lib/sheets.ts'
 import { useNavigate } from 'react-router-dom'
 import { computeNextUp } from '../lib/utils/nextUp.js'
 import StageTimeline from '../components/StageTimeline.jsx'
 import NewMigrationModal from '../components/NewMigrationModal.jsx'
+import { useAuth } from '../state/AuthContext.tsx'
 
 export default function DashboardOwner() {
   const navigate = useNavigate()
+  const { authed, requestSignIn, userEmail } = useAuth()
+  const [error, setError] = useState('')
   const [loading, setLoading] = useState(true)
   const [items, setItems] = useState([])
   const [stagePerf, setStagePerf] = useState([])
@@ -17,14 +20,30 @@ export default function DashboardOwner() {
   useEffect(() => {
     console.log('[MH-UI] Owner Dashboard loaded')
     let active = true
+    if (!authed) { setLoading(false); return }
     ;(async () => {
       try {
-        const [migs, perf] = await Promise.all([getMigrations(), getStagePerformance()])
+        const migs = await getSheetMigrations()
         if (!active) return
-        setItems(migs)
-        setStagePerf(perf)
+        let normalized = migs.map((m) => ({
+          MigrationID: m.migrationId || m.MigrationID,
+          CustomerID: m.customerId || m.CustomerID,
+          Customer: m.customerName || m.Customer,
+          Stage: m.stage || m.Stage,
+          Status: m.status || m.Status || '—',
+          Days: m.daysInStage ?? m.Days ?? '—',
+          OwnerEmail: m.ownerEmail || m.OwnerEmail || '',
+        }))
+        if (userEmail) {
+          const le = userEmail.toLowerCase()
+          normalized = normalized.filter((r) => String(r.OwnerEmail || '').toLowerCase() === le)
+        }
+        setItems(normalized)
+        const counts = normalized.reduce((acc, m) => { const s = (m.Stage || '').toString(); acc[s] = (acc[s] || 0) + 1; return acc }, {})
+        setStagePerf(Object.entries(counts).map(([Stage, Count]) => ({ Stage, Count })))
       } catch (e) {
         console.error(e)
+        setError(e instanceof Error ? e.message : 'Failed to load')
       } finally {
         setLoading(false)
       }
@@ -32,7 +51,7 @@ export default function DashboardOwner() {
     return () => {
       active = false
     }
-  }, [])
+  }, [authed])
 
   const nextUp = useMemo(() => computeNextUp(items), [items])
 
@@ -61,8 +80,14 @@ export default function DashboardOwner() {
         </button>
       </div>
 
+      {error && <div className="text-rose-600 text-sm">{error}</div>}
       <Card>
-        {loading ? (
+        {!authed ? (
+          <div className="p-6 text-center">
+            <div className="mb-2 text-slate-600">Sign in to load data</div>
+            <button onClick={requestSignIn} className="rounded-xl bg-slate-900 text-white px-3 py-2">Sign in with Google</button>
+          </div>
+        ) : loading ? (
           <div className="divide-y divide-slate-100">
             {Array.from({ length: 5 }).map((_, i) => (
               <div key={i} className="p-4 animate-pulse">
@@ -77,10 +102,11 @@ export default function DashboardOwner() {
           <div className="p-4">
             <DataTable
               columns={columns}
-              data={nextUp.map((r) => ({ ...r, id: r.MigrationID }))}
+              data={nextUp}
               onRowClick={(row) => navigate(`/details/${row.MigrationID}`)}
               rowAction={{ label: 'Draft email', onClick: (row) => console.log('[MH-UI] Draft email for', row) }}
               stickyHeader zebra
+              rowKey={(r) => r.MigrationID}
             />
           </div>
         )}

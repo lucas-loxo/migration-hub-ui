@@ -2,19 +2,19 @@
 
 Vite + React SPA using Tailwind, Chart.js, and HashRouter. Deploys automatically to GitHub Pages via `gh-pages` branch.
 
-## Configure API
+## Configuration
 
-Edit `src/lib/config.js` and set:
+Environment-based Sheets ID:
 
-```js
-export const APPS_SCRIPT_API_URL = ""; // fill later with https://script.google.com/macros/s/.../exec
+- Copy `.env.example` to `.env.local` and set:
+
+```
+VITE_SHEETS_ID=YOUR_SHEET_ID
 ```
 
-- Leave empty to use built-in sample data.
-- When set, the app will call your Apps Script web app endpoints:
-  - GET `${APPS_SCRIPT_API_URL}?action=getMigrations`
-  - GET `${APPS_SCRIPT_API_URL}?action=getStagePerformance`
-  - POST `${APPS_SCRIPT_API_URL}?action=updateMigrationStatus` with JSON body `{ migrationId, newStageOrStatus }`
+- Start dev: `npm run dev`. If the variable is missing in dev, a small banner will remind you.
+
+- GitHub Pages: add a repository secret named `VITE_SHEETS_ID`. The Pages workflow writes it into `.env.production` before building.
 
 ## Development
 
@@ -30,7 +30,7 @@ export const APPS_SCRIPT_API_URL = ""; // fill later with https://script.google.
 
 ## Deploy (GitHub Pages)
 
-- On push to `main`, GitHub Actions builds and deploys `dist/` to the `gh-pages` branch.
+- On push to `main`, GitHub Actions builds and deploys `dist/` to the `gh-pages` branch, creating `.env.production` from the `VITE_SHEETS_ID` secret.
 - Vite base is set to `/migration-hub-ui/`.
 
 ## Routes
@@ -40,6 +40,7 @@ export const APPS_SCRIPT_API_URL = ""; // fill later with https://script.google.
 - `#/details/:migrationId`
 - `#/remapping`
 - `#/communication`
+ - `#/reports`
 
 ## Notes
 
