@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from 'react'
 
-export default function DataTable({ columns, data, defaultSort, onRowClick, rowAction, stickyHeader = true, zebra = true }) {
+export default function DataTable({ columns, data, defaultSort, onRowClick, rowAction, stickyHeader = true, zebra = true, rowKey }) {
   const [sort, setSort] = useState(defaultSort || null)
 
   const sortedData = useMemo(() => {
@@ -52,7 +52,7 @@ export default function DataTable({ columns, data, defaultSort, onRowClick, rowA
         <tbody>
           {sortedData.map((row, idx) => (
             <tr
-              key={row.id || row.MigrationID}
+              key={rowKey ? rowKey(row) : (row.id || row.MigrationID)}
               onClick={() => onRowClick && onRowClick(row)}
               className={`border-t border-slate-100 ${zebra ? (idx % 2 === 0 ? 'bg-white' : 'bg-slate-50/30') : ''} hover:bg-slate-50 ${
                 onRowClick ? 'cursor-pointer' : ''

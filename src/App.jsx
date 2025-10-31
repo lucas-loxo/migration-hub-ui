@@ -29,6 +29,11 @@ export default function App() {
   }, [])
   return (
     <AppLayout>
+      {import.meta.env.DEV && !import.meta.env.VITE_SHEETS_ID ? (
+        <div className="mb-3 text-xs text-rose-700 bg-rose-50 border border-rose-200 rounded-lg px-3 py-2">
+          Missing VITE_SHEETS_ID. Copy .env.example to .env.local and set your Google Sheet ID.
+        </div>
+      ) : null}
       <Routes>
         <Route path="/dashboard-owner" element={<DashboardOwner />} />
         <Route path="/migrations" element={<Migrations />} />
