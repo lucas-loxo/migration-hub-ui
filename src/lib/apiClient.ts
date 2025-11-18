@@ -35,7 +35,25 @@ export type StatusSyncRequest = {
  * This triggers the status sync flow which updates the corresponding GitHub issue
  */
 export async function syncMigrationStatusToGitHub(request: StatusSyncRequest): Promise<{ success: boolean }> {
-  return postJSON('/migrations/status-sync', request)
+  const response = await fetch('https://hooks.zapier.com/hooks/catch/25132117/u8vyvfs/', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      migrationId: request.migrationId,
+      targetStatus: request.targetStatus,
+      customerId: request.customerId,
+      currentStage: request.currentStage,
+      updatedByUserEmail: request.updatedByUserEmail,
+    }),
+  })
+
+  if (!response.ok) {
+    throw new Error(`Zapier status sync failed: ${response.status} ${response.statusText}`)
+  }
+
+  return response.json()
 }
 
 /**
