@@ -283,9 +283,9 @@ export default function CustomerPage() {
         <div className="space-y-6">
           {/* Gmail Thread */}
           {snapshot && snapshot.MigrationID && (
-            <Card className="p-6">
-              <h2 className="text-lg font-semibold text-slate-900 mb-4">Gmail Thread</h2>
-              <div className="h-[420px] overflow-y-auto space-y-3">
+            <Card className="p-4">
+              <h2 className="text-lg font-semibold text-slate-900 mb-3">Gmail Thread</h2>
+              <div className="max-h-[420px] overflow-y-auto space-y-2 px-1">
                 {messages.length === 0 ? (
                   <div className="text-sm text-slate-500 text-center py-8">No messages in this thread</div>
                 ) : (
@@ -294,22 +294,26 @@ export default function CustomerPage() {
                     return (
                       <div
                         key={index}
-                        className={`p-3 rounded-lg ${
-                          isIncoming
-                            ? 'bg-slate-50 border border-slate-200'
-                            : 'bg-blue-50 border border-blue-200'
-                        }`}
+                        className={`flex ${isIncoming ? 'justify-start' : 'justify-end'}`}
                       >
-                        <div className="flex items-start justify-between mb-2">
-                          <div className="text-sm font-medium text-slate-900">
+                        <div
+                          className={`max-w-[80%] rounded-2xl px-4 py-2 ${
+                            isIncoming
+                              ? 'bg-slate-100 text-slate-900 rounded-tl-sm'
+                              : 'bg-[#E01E73] text-white rounded-tr-sm'
+                          }`}
+                        >
+                          <div className={`text-xs mb-1 ${isIncoming ? 'text-slate-600' : 'text-white/90'}`}>
                             {msg.FromName || msg.FromEmail || 'Unknown'}
+                            {msg.SentAt && (
+                              <span className="ml-2">
+                                {new Date(msg.SentAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                              </span>
+                            )}
                           </div>
-                          <div className="text-xs text-slate-500">
-                            {msg.SentAt ? new Date(msg.SentAt).toLocaleString() : '—'}
+                          <div className={`text-sm whitespace-pre-wrap ${isIncoming ? 'text-slate-800' : 'text-white'}`}>
+                            {msg.BodyPlain || msg.Subject || '—'}
                           </div>
-                        </div>
-                        <div className="text-sm text-slate-700 whitespace-pre-wrap">
-                          {msg.BodyPlain || msg.Subject || '—'}
                         </div>
                       </div>
                     )
@@ -731,17 +735,20 @@ export default function CustomerPage() {
             </Card>
           )}
 
-          {/* Customer Summary Card */}
+          {/* Merged Customer Details Card */}
           {snapshot && (
             <Card className="p-6">
-              <h2 className="text-lg font-semibold text-slate-900 mb-4">Customer Summary</h2>
-              <div className="space-y-3">
+              <h2 className="text-lg font-semibold text-slate-900 mb-4">Customer Details</h2>
+              <div className="grid grid-cols-1 gap-4 max-h-96 overflow-y-auto">
+                {/* Status at top */}
                 <div>
                   <div className="text-sm text-slate-500 mb-1">Status</div>
                   <div className="inline-flex items-center px-3 py-1 rounded-md text-sm font-medium bg-slate-50 text-slate-700">
                     {snapshot.Status || '—'}
                   </div>
                 </div>
+                
+                {/* Primary Contact */}
                 <div>
                   <div className="text-sm text-slate-500 mb-1">Primary Contact</div>
                   <div className="text-sm text-slate-900">
@@ -755,27 +762,7 @@ export default function CustomerPage() {
                     )}
                   </div>
                 </div>
-                {snapshot.customerSegment && (
-                  <div>
-                    <div className="text-sm text-slate-500 mb-1">Segment</div>
-                    <div className="text-sm text-slate-900">{snapshot.customerSegment}</div>
-                  </div>
-                )}
-                {snapshot.pod && (
-                  <div>
-                    <div className="text-sm text-slate-500 mb-1">Pod</div>
-                    <div className="text-sm text-slate-900">{snapshot.pod}</div>
-                  </div>
-                )}
-              </div>
-            </Card>
-          )}
-
-          {/* Full Customer Details */}
-          {snapshot && (
-            <Card className="p-6">
-              <h2 className="text-lg font-semibold text-slate-900 mb-4">Customer Details</h2>
-              <div className="grid grid-cols-1 gap-4 max-h-96 overflow-y-auto">
+                
                 <div>
                   <div className="text-sm text-slate-500 mb-1">Previous ATS</div>
                   <div className="text-sm text-slate-900">{snapshot.previousATS || '—'}</div>
@@ -900,12 +887,12 @@ export default function CustomerPage() {
               </div>
             </Card>
           )}
-
-          {/* Activity Feed */}
-          <div className="max-h-80 overflow-y-auto">
-            <ActivityFeed migrationId={snapshot?.MigrationID || customerId || ''} />
-          </div>
         </div>
+      </div>
+
+      {/* Activity Feed - Full Width Footer */}
+      <div className="mt-6">
+        <ActivityFeed migrationId={snapshot?.MigrationID || customerId || ''} />
       </div>
       
       {toast && (
