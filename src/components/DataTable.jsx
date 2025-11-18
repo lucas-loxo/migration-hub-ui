@@ -6,9 +6,11 @@ export default function DataTable({ columns, data, defaultSort, onRowClick, rowA
   const sortedData = useMemo(() => {
     if (!sort) return data
     const { id, dir } = sort
+    const col = columns.find((c) => c.id === id)
+    const sortVal = col && col.sortValue
     return [...data].sort((a, b) => {
-      const va = a[id]
-      const vb = b[id]
+      const va = sortVal ? sortVal(a) : a[id]
+      const vb = sortVal ? sortVal(b) : b[id]
       if (va == null && vb == null) return 0
       if (va == null) return 1
       if (vb == null) return -1
@@ -26,15 +28,16 @@ export default function DataTable({ columns, data, defaultSort, onRowClick, rowA
   }
 
   return (
-    <div className="overflow-hidden border border-slate-200 rounded-2xl bg-white">
-      <table className="min-w-full">
-        <thead className="bg-slate-50">
+    <div className="overflow-hidden border border-[#E3D7E8] rounded-2xl bg-white">
+      <table className="w-full table-fixed">
+        <thead className="bg-[#E01E73]/5">
           <tr>
             {columns.map((col) => (
               <th
                 key={col.id}
                 onClick={() => setSortBy(col.id, col.sortable)}
-                className={`text-left text-slate-600 text-sm font-medium px-4 py-3 ${stickyHeader ? 'sticky top-0 bg-slate-50 z-10' : ''} ${
+                style={col.width ? { width: col.width } : undefined}
+                className={`text-left text-[#6B647E] text-sm font-medium px-4 py-3 border-b border-[#E3D7E8] ${stickyHeader ? 'sticky top-0 bg-[#E01E73]/5 z-10' : ''} ${
                   col.sortable ? 'cursor-pointer select-none' : ''
                 }`}
               >
@@ -46,7 +49,7 @@ export default function DataTable({ columns, data, defaultSort, onRowClick, rowA
                 </div>
               </th>
             ))}
-            {rowAction ? <th className="px-4 py-3" /> : null}
+            {rowAction ? <th className="px-4 py-3 border-b border-[#E3D7E8]" /> : null}
           </tr>
         </thead>
         <tbody>
@@ -54,12 +57,16 @@ export default function DataTable({ columns, data, defaultSort, onRowClick, rowA
             <tr
               key={rowKey ? rowKey(row) : (row.id || row.MigrationID)}
               onClick={() => onRowClick && onRowClick(row)}
-              className={`border-t border-slate-100 ${zebra ? (idx % 2 === 0 ? 'bg-white' : 'bg-slate-50/30') : ''} hover:bg-slate-50 ${
+              className={`border-t border-[#E3D7E8] ${zebra ? (idx % 2 === 0 ? 'bg-white' : 'bg-[#FFF8FC]') : ''} hover:bg-[#E01E73]/5 ${
                 onRowClick ? 'cursor-pointer' : ''
               }`}
             >
               {columns.map((col) => (
-                <td key={col.id} className="px-4 py-3 text-sm text-slate-800">
+                <td 
+                  key={col.id} 
+                  style={col.width ? { width: col.width } : undefined}
+                  className="px-4 py-3 text-sm text-[#1B1630]"
+                >
                   {col.cell ? col.cell(row[col.id], row) : row[col.id]}
                 </td>
               ))}
@@ -71,7 +78,7 @@ export default function DataTable({ columns, data, defaultSort, onRowClick, rowA
                       e.stopPropagation()
                       rowAction.onClick(row)
                     }}
-                    className="text-sm rounded-lg bg-slate-900 text-white px-3 py-1.5 shadow hover:shadow-md"
+                    className="text-sm rounded-lg bg-[#E01E73] text-white px-3 py-1.5 shadow hover:bg-[#B0175B] hover:shadow-md"
                   >
                     {rowAction.label}
                   </button>
@@ -81,7 +88,7 @@ export default function DataTable({ columns, data, defaultSort, onRowClick, rowA
           ))}
           {sortedData.length === 0 ? (
             <tr>
-              <td colSpan={columns.length + (rowAction ? 1 : 0)} className="px-4 py-6 text-center text-slate-500">
+              <td colSpan={columns.length + (rowAction ? 1 : 0)} className="px-4 py-6 text-center text-[#6B647E]">
                 No data
               </td>
             </tr>

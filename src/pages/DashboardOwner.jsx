@@ -5,7 +5,8 @@ import { getMigrations as getSheetMigrations } from '../lib/sheets.ts'
 import { useNavigate } from 'react-router-dom'
 import { computeNextUp } from '../lib/utils/nextUp.js'
 import StageTimeline from '../components/StageTimeline.jsx'
-import NewMigrationModal from '../components/NewMigrationModal.jsx'
+import { FORM_NEW_MIGRATION_URL } from '../config/constants.ts'
+import { buildPrefilledFormUrl } from '../lib/forms.ts'
 import { useAuth } from '../state/AuthContext.tsx'
 
 export default function DashboardOwner() {
@@ -73,8 +74,18 @@ export default function DashboardOwner() {
         <h2 className="text-lg font-semibold text-slate-900">Next Up</h2>
         <button
           type="button"
-          onClick={() => setModalOpen(true)}
-          className="inline-flex items-center rounded-xl bg-slate-900 text-white text-sm px-3 py-2 shadow hover:shadow-md transition"
+          onClick={() => {
+            // TODO: Replace owner prefill key with Google Forms entry.<ID> once available
+            const base = FORM_NEW_MIGRATION_URL
+            if (!base) return
+            const url = userEmail ? buildPrefilledFormUrl(base, { owner: userEmail }) : base
+            window.open(url, '_blank', 'noopener')
+          }}
+          disabled={!FORM_NEW_MIGRATION_URL}
+          title={!FORM_NEW_MIGRATION_URL ? 'Form URL not configured.' : undefined}
+          className={`inline-flex items-center rounded-xl text-white text-sm px-3 py-2 shadow transition ${
+            !FORM_NEW_MIGRATION_URL ? 'bg-slate-400 cursor-not-allowed' : 'bg-slate-900 hover:shadow-md'
+          }`}
         >
           + New Migration
         </button>
@@ -118,8 +129,6 @@ export default function DashboardOwner() {
           <StageTimeline counts={Object.fromEntries(stagePerf.map((s) => [s.Stage, s.Count]))} />
         </Card>
       </div>
-
-      <NewMigrationModal open={modalOpen} onClose={() => setModalOpen(false)} />
     </div>
   )
 }

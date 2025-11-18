@@ -1,0 +1,9 @@
+Map Google Sheets Schema (Header-Based)
+
+Task:
+- Read `'MH_View_Migrations'!A1:G` with majorDimension=ROWS.
+- Build header→index map from row 1; map rows 2..N to required keys.
+
+Acceptance:
+- No hardcoded indices/letters; trim strings; coerce DaysInStage to number; Status to allowed set or "On Track".
+

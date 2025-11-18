@@ -9,3 +9,24 @@ html, body, #root {
 body {
   @apply bg-slate-50 text-slate-800;
 }
+
+/* Fixed layout for Workload by BTC heatmap table */
+.mh-workload-heatmap-table {
+  table-layout: fixed;
+  width: 100%;
+}
+
+.mh-workload-heatmap-table th,
+.mh-workload-heatmap-table td {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Headers can wrap for two-line labels, but data cells should not wrap */
+.mh-workload-heatmap-table th {
+  white-space: normal;
+}
+
+.mh-workload-heatmap-table td {
+  white-space: nowrap;
+}

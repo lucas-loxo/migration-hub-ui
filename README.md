@@ -15,6 +15,7 @@ VITE_SHEETS_ID=YOUR_SHEET_ID
 - Start dev: `npm run dev`. If the variable is missing in dev, a small banner will remind you.
 
 - GitHub Pages: add a repository secret named `VITE_SHEETS_ID`. The Pages workflow writes it into `.env.production` before building.
+ - GitHub Pages: add a repository secret named `VITE_SHEETS_ID`. The Pages workflow injects it into the build environment.
 
 ## Development
 
@@ -31,6 +32,11 @@ VITE_SHEETS_ID=YOUR_SHEET_ID
 ## Deploy (GitHub Pages)
 
 - On push to `main`, GitHub Actions builds and deploys `dist/` to the `gh-pages` branch, creating `.env.production` from the `VITE_SHEETS_ID` secret.
+ - On push to `main`, GitHub Actions builds and deploys `dist/` to the `gh-pages` branch, injecting `VITE_SHEETS_ID` into the build.
+ 
+### Troubleshooting
+ - Dev banner says missing ID: create `.env.local` with `VITE_SHEETS_ID=...` and restart `npm run dev`.
+ - Blank page in Pages: check Actions logs to confirm `VITE_SHEETS_ID` secret is present.
 - Vite base is set to `/migration-hub-ui/`.
 
 ## Routes

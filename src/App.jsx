@@ -1,20 +1,18 @@
 import React, { useEffect } from 'react'
-import { Routes, Route, Navigate, useLocation } from 'react-router-dom'
+import { useLocation } from 'react-router-dom'
 import AppShell from './layouts/AppShell.jsx'
-import Reports from './pages/Reports.jsx'
-import DashboardOwner from './pages/DashboardOwner.jsx'
-import Migrations from './pages/Migrations.jsx'
-import Details from './pages/Details.jsx'
-import Remapping from './pages/Remapping.jsx'
-import Communication from './pages/Communication.jsx'
+import { FORM_NEW_MIGRATION_URL } from './config/constants.ts'
+import AuthGate from './components/AuthGate.jsx'
 
 function AppLayout({ children }) {
   const location = useLocation()
   const titleMap = {
+    // '/': 'Dashboard', // Temporarily disabled
     '/dashboard-owner': 'Owner Dashboard',
-    '/migrations': 'All Migrations',
+    '/migrations': 'Migrations',
     '/remapping': 'Remapping',
     '/communication': 'Communication',
+    '/messaging': 'Messaging',
   }
   const currentPath = location.pathname.replace('#', '')
   const title = titleMap[currentPath] || 'Migration Hub'
@@ -26,23 +24,14 @@ function AppLayout({ children }) {
 export default function App() {
   useEffect(() => {
     console.log('[MH-UI] App mounted')
+    if (!FORM_NEW_MIGRATION_URL) {
+      console.warn('[MH-UI] New Migration Form URL not configured')
+    }
   }, [])
+  
   return (
     <AppLayout>
-      {import.meta.env.DEV && !import.meta.env.VITE_SHEETS_ID ? (
-        <div className="mb-3 text-xs text-rose-700 bg-rose-50 border border-rose-200 rounded-lg px-3 py-2">
-          Missing VITE_SHEETS_ID. Copy .env.example to .env.local and set your Google Sheet ID.
-        </div>
-      ) : null}
-      <Routes>
-        <Route path="/dashboard-owner" element={<DashboardOwner />} />
-        <Route path="/migrations" element={<Migrations />} />
-        <Route path="/details/:migrationId" element={<Details />} />
-        <Route path="/remapping" element={<Remapping />} />
-        <Route path="/communication" element={<Communication />} />
-        <Route path="/reports" element={<Reports />} />
-        <Route path="*" element={<Navigate to="/dashboard-owner" replace />} />
-      </Routes>
+      <AuthGate />
     </AppLayout>
   )
 }

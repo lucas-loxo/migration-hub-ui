@@ -1,0 +1,116 @@
+{
+  "migrations": [
+    {
+      "page": "migrations",
+      "row": 1,
+      "component_id": "new_migration_button",
+      "colStart": 1,
+      "colEnd": 2
+    },
+    {
+      "page": "migrations",
+      "row": 1,
+      "component_id": "search_bar",
+      "colStart": 3,
+      "colEnd": 6
+    },
+    {
+      "page": "migrations",
+      "row": 1,
+      "component_id": "owner_filter",
+      "colStart": 7,
+      "colEnd": 7
+    },
+    {
+      "page": "migrations",
+      "row": 1,
+      "component_id": "next_up_toggle",
+      "colStart": 8,
+      "colEnd": 8
+    },
+    {
+      "page": "migrations",
+      "row": 1,
+      "component_id": "all_migrations_toggle",
+      "colStart": 9,
+      "colEnd": 9
+    },
+    {
+      "page": "migrations",
+      "row": 2,
+      "component_id": "stage_upload_metric",
+      "colStart": 1,
+      "colEnd": 1
+    },
+    {
+      "page": "migrations",
+      "row": 2,
+      "component_id": "stage_eng_map_metric",
+      "colStart": 2,
+      "colEnd": 2
+    },
+    {
+      "page": "migrations",
+      "row": 2,
+      "component_id": "stage_cust_map_metric",
+      "colStart": 3,
+      "colEnd": 3
+    },
+    {
+      "page": "migrations",
+      "row": 2,
+      "component_id": "stage_import_metric",
+      "colStart": 4,
+      "colEnd": 4
+    },
+    {
+      "page": "migrations",
+      "row": 2,
+      "component_id": "stage_val_req_metric",
+      "colStart": 5,
+      "colEnd": 5
+    },
+    {
+      "page": "migrations",
+      "row": 2,
+      "component_id": "stage_val_val_metric",
+      "colStart": 6,
+      "colEnd": 6
+    },
+    {
+      "page": "migrations",
+      "row": 2,
+      "component_id": "stage_final_conf_metric",
+      "colStart": 7,
+      "colEnd": 7
+    },
+    {
+      "page": "migrations",
+      "row": 2,
+      "component_id": "stage_dup_merge_metric",
+      "colStart": 8,
+      "colEnd": 8
+    },
+    {
+      "page": "migrations",
+      "row": 2,
+      "component_id": "stage_complete_metric",
+      "colStart": 9,
+      "colEnd": 9
+    },
+    {
+      "page": "migrations",
+      "row": 3,
+      "component_id": "owner_migrations_table",
+      "colStart": 1,
+      "colEnd": 9
+    },
+    {
+      "page": "migrations",
+      "row": 4,
+      "component_id": "overdue_migrations",
+      "colStart": 1,
+      "colEnd": 9
+    }
+  ]
+}

@@ -1,4 +1,6 @@
-import { APPS_SCRIPT_API_URL } from './config.js'
+// Legacy API client - Apps Script references removed
+// TODO: Migrate to apiClient.ts for new endpoints
+const APPS_SCRIPT_API_URL = "" // Removed - use apiClient.ts instead
 import { migrations as sampleMigrations, stagePerformance as sampleStagePerformance } from './sampleData.js'
 
 async function fetchJson(url, init) {

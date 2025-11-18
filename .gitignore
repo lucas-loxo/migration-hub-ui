@@ -24,3 +24,7 @@ dist-ssr
 *.sw?
 .env*
 !.env.example
+
+# [MH-AI] Service account credentials
+config/*.json
+!config/*.example.json

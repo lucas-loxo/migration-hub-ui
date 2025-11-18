@@ -1,0 +1,10 @@
+Add Stage Dropdown (Header-Embedded)
+
+Task:
+- Embed a compact Stage <select> in the Stage table header.
+- Options: “All Stages” + canonical Stage order; filter exact match when selected.
+
+Acceptance:
+- Composes with search and Next Up (Status === "Behind").
+- Sorting uses custom Stage order, not alphabetical.
+

@@ -2,15 +2,16 @@ import React from 'react'
 import { NavLink } from 'react-router-dom'
 
 const links = [
-  { to: '/dashboard-owner', label: 'Dashboard', icon: '📊' },
+  // { to: '/', label: 'Dashboard', icon: '📊' }, // Temporarily disabled
   { to: '/migrations', label: 'Migrations', icon: '🗂️' },
+  { to: '/messaging', label: 'Inbox', icon: '💬' },
   { to: '/reports', label: 'Reports', icon: '📈' },
 ]
 
 export default function Sidebar({ collapsed = false }) {
   return (
-    <aside className={`${collapsed ? 'w-16' : 'w-64'} shrink-0 hidden md:flex flex-col border-r border-slate-200 bg-white transition-all duration-200`}>
-      <div className={`h-16 flex items-center ${collapsed ? 'justify-center' : 'px-4'} text-xl font-bold`}>
+    <aside className={`${collapsed ? 'w-16' : 'w-64'} shrink-0 hidden md:flex flex-col border-r border-[#E3D7E8] bg-white transition-all duration-200`}>
+      <div className={`h-16 flex items-center ${collapsed ? 'justify-center' : 'px-4'} text-xl font-bold text-[#1B1630]`}>
         <span>🚀</span>
         {!collapsed && <span className="ml-2">Migration Hub</span>}
       </div>
@@ -19,9 +20,10 @@ export default function Sidebar({ collapsed = false }) {
           <NavLink
             key={l.to}
             to={l.to}
+            end={l.to === '/migrations'}
             className={({ isActive }) =>
               `flex items-center gap-2 rounded-xl ${collapsed ? 'justify-center' : ''} px-3 py-2 transition ${
-                isActive ? 'bg-slate-100 text-slate-900' : 'text-slate-600 hover:bg-slate-50'
+                isActive ? 'bg-[#E01E73] text-white' : 'text-[#6B647E] hover:bg-[#E01E73]/10'
               }`
             }
           >

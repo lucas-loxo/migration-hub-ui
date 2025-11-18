@@ -31,11 +31,13 @@ export async function initGoogle({ clientId, scopes }: InitArgs) {
   if (!(window as any).google || !(window as any).google.accounts?.oauth2) {
     throw new Error('Google Identity Services not available')
   }
+  const scopeString = scopes.join(' ')
+  console.log('[MH-UI] Google auth scopes:', scopeString)
   // @ts-ignore
   tokenClient = (window as any).google.accounts.oauth2.initTokenClient({
     client_id: clientId,
     // join scopes with space
-    scope: scopes.join(' '),
+    scope: scopeString,
     callback: (resp: any) => {
       if (resp && resp.access_token) {
         token = resp.access_token

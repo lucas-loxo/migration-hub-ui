@@ -1,0 +1,406 @@
+[
+  {
+    "component_id": "new_migration_button",
+    "label": "New Migration",
+    "type": "button",
+    "sheet_tab": "MH_View_Migrations",
+    "range": "action=openNewMigrationModal",
+    "depends_on": "{\"variant\":\"primary\"}",
+    "props": {
+      "Opens the create-migration flow.": ""
+    }
+  },
+  {
+    "component_id": "search_bar",
+    "label": "Search",
+    "type": "filter",
+    "sheet_tab": "MH_View_Migrations",
+    "range": "A:Z",
+    "filter_key": "search",
+    "props": {
+      "mode": "text",
+      "targets": [
+        "CustomerName",
+        "MigrationID",
+        "PreviousATS"
+      ]
+    },
+    "notes": "Free-text search across key fields."
+  },
+  {
+    "component_id": "owner_filter",
+    "label": "Owner",
+    "type": "filter",
+    "sheet_tab": "Owners",
+    "range": "A:B",
+    "primary_key_col": "OwnerEmail",
+    "filter_key": "OwnerEmail",
+    "props": {
+      "allowAll": true,
+      "allLabel": "All Owners"
+    },
+    "notes": "Dropdown to filter by OwnerEmail."
+  },
+  {
+    "component_id": "next_up_toggle",
+    "label": "Behind",
+    "type": "filter",
+    "sheet_tab": "",
+    "range": "",
+    "primary_key_col": "ShowBehindOnly",
+    "depends_on": "{\"mode\":\"toggle\",\"default\":false}",
+    "props": {
+      "Toggle to emphasize behind/next-up items.": ""
+    }
+  },
+  {
+    "component_id": "all_migrations_toggle",
+    "label": "All Migrations",
+    "type": "filter",
+    "sheet_tab": "",
+    "range": "",
+    "primary_key_col": "ShowAllMigrations",
+    "depends_on": "{\"mode\":\"toggle\",\"default\":true}",
+    "props": {
+      "Toggle to show all migrations.": ""
+    }
+  },
+  {
+    "component_id": "stage_upload_metric",
+    "label": "Upload",
+    "type": "metric",
+    "sheet_tab": "Rpt_StageMetrics",
+    "range": "A:F",
+    "primary_key_col": "Stage",
+    "filter_key": "Stage=Waiting on Data Upload;OwnerEmail",
+    "depends_on": "owner_filter",
+    "props": {
+      "value_col": "TotalCount",
+      "behind_col": "BehindCount",
+      "percent_col": "PercentBehind"
+    },
+    "notes": "Migrations in Waiting on Data Upload (by owner or ALL)."
+  },
+  {
+    "component_id": "stage_eng_map_metric",
+    "label": "Eng Map",
+    "type": "metric",
+    "sheet_tab": "Rpt_StageMetrics",
+    "range": "A:F",
+    "primary_key_col": "Stage",
+    "filter_key": "Stage=Waiting on Eng Import Map;OwnerEmail",
+    "depends_on": "owner_filter",
+    "props": {
+      "value_col": "TotalCount",
+      "behind_col": "BehindCount",
+      "percent_col": "PercentBehind"
+    },
+    "notes": "Migrations in Waiting on Eng Import Map."
+  },
+  {
+    "component_id": "stage_cust_map_metric",
+    "label": "Cust Map",
+    "type": "metric",
+    "sheet_tab": "Rpt_StageMetrics",
+    "range": "A:F",
+    "primary_key_col": "Stage",
+    "filter_key": "Stage=Waiting on Customer Import Map;OwnerEmail",
+    "depends_on": "owner_filter",
+    "props": {
+      "value_col": "TotalCount",
+      "behind_col": "BehindCount",
+      "percent_col": "PercentBehind"
+    },
+    "notes": "Migrations in Waiting on Customer Import Map."
+  },
+  {
+    "component_id": "stage_import_metric",
+    "label": "Import",
+    "type": "metric",
+    "sheet_tab": "Rpt_StageMetrics",
+    "range": "A:F",
+    "primary_key_col": "Stage",
+    "filter_key": "Stage=Waiting on Data Import;OwnerEmail",
+    "depends_on": "owner_filter",
+    "props": {
+      "value_col": "TotalCount",
+      "behind_col": "BehindCount",
+      "percent_col": "PercentBehind"
+    },
+    "notes": "Migrations in Waiting on Data Import."
+  },
+  {
+    "component_id": "stage_val_req_metric",
+    "label": "Val Req",
+    "type": "metric",
+    "sheet_tab": "Rpt_StageMetrics",
+    "range": "A:F",
+    "primary_key_col": "Stage",
+    "filter_key": "Stage=Waiting on Validation Requests;OwnerEmail",
+    "depends_on": "owner_filter",
+    "props": {
+      "value_col": "TotalCount",
+      "behind_col": "BehindCount",
+      "percent_col": "PercentBehind"
+    },
+    "notes": "Migrations in Waiting on Validation Requests."
+  },
+  {
+    "component_id": "stage_val_val_metric",
+    "label": "Eng Val",
+    "type": "metric",
+    "sheet_tab": "Rpt_StageMetrics",
+    "range": "A:F",
+    "primary_key_col": "Stage",
+    "filter_key": "Stage=Waiting on Eng Validation;OwnerEmail",
+    "depends_on": "owner_filter",
+    "props": {
+      "value_col": "TotalCount",
+      "behind_col": "BehindCount",
+      "percent_col": "PercentBehind"
+    },
+    "notes": "Migrations in Waiting on Eng Validation."
+  },
+  {
+    "component_id": "stage_final_conf_metric",
+    "label": "Final Conf",
+    "type": "metric",
+    "sheet_tab": "Rpt_StageMetrics",
+    "range": "A:F",
+    "primary_key_col": "Stage",
+    "filter_key": "Stage=Waiting on Final Confirmation;OwnerEmail",
+    "depends_on": "owner_filter",
+    "props": {
+      "value_col": "TotalCount",
+      "behind_col": "BehindCount",
+      "percent_col": "PercentBehind"
+    },
+    "notes": "Migrations in Waiting on Final Confirmation."
+  },
+  {
+    "component_id": "stage_dup_merge_metric",
+    "label": "Dup Merge",
+    "type": "metric",
+    "sheet_tab": "Rpt_StageMetrics",
+    "range": "A:F",
+    "primary_key_col": "Stage",
+    "filter_key": "Stage=Waiting on Duplicate Merge;OwnerEmail",
+    "depends_on": "owner_filter",
+    "props": {
+      "value_col": "TotalCount",
+      "behind_col": "BehindCount",
+      "percent_col": "PercentBehind"
+    },
+    "notes": "Migrations in Waiting on Duplicate Merge."
+  },
+  {
+    "component_id": "stage_complete_metric",
+    "label": "Complete",
+    "type": "metric",
+    "sheet_tab": "Rpt_StageMetrics",
+    "range": "A:F",
+    "primary_key_col": "Stage",
+    "filter_key": "Stage=Complete;OwnerEmail",
+    "depends_on": "owner_filter",
+    "props": {
+      "value_col": "TotalCount",
+      "behind_col": "BehindCount",
+      "percent_col": "PercentBehind"
+    },
+    "notes": "Migrations in Complete."
+  },
+  {
+    "component_id": "owner_migrations_table",
+    "label": "Migrations",
+    "type": "table",
+    "sheet_tab": "MH_View_Migrations",
+    "range": "A:Z",
+    "primary_key_col": "MigrationID",
+    "filter_key": "OwnerEmail",
+    "depends_on": "owner_filter",
+    "props": {
+      "pageSize": 25
+    },
+    "notes": "Main migrations table for selected owner (or all)."
+  },
+  {
+    "component_id": "overdue_migrations",
+    "label": "Next Up / Behind",
+    "type": "table",
+    "sheet_tab": "Rpt_BehindMigrations",
+    "range": "A:Z",
+    "primary_key_col": "MigrationID",
+    "filter_key": "OwnerEmail",
+    "depends_on": "owner_filter",
+    "props": {
+      "pageSize": 10
+    },
+    "notes": "Worklist of behind migrations (Next Up), filterable by Owner."
+  },
+  {
+    "component_id": "reports_btc_filter",
+    "label": "BTC Filter",
+    "type": "filter",
+    "sheet_tab": "Rpt_ReportsSummary",
+    "range": "A:A",
+    "primary_key_col": "BTC",
+    "props": {
+      "mode": "select",
+      "source_col": "BTC",
+      "all_label": "All BTCs"
+    },
+    "notes": "Controls which BTC / All is in scope for reports."
+  },
+  {
+    "component_id": "reports_active",
+    "label": "Active Migrations",
+    "type": "metric",
+    "sheet_tab": "Rpt_ReportsSummary",
+    "range": "A:E",
+    "primary_key_col": "BTC",
+    "filter_key": "BTC={{reports_btc_filter}}",
+    "depends_on": "reports_btc_filter",
+    "props": {
+      "value_col": "ActiveCount"
+    },
+    "notes": "Top-left KPI: count of active (non-complete) migrations in scope."
+  },
+  {
+    "component_id": "reports_behind_percent",
+    "label": "Behind %",
+    "type": "metric",
+    "sheet_tab": "Rpt_ReportsSummary",
+    "range": "A:D",
+    "primary_key_col": "BTC",
+    "filter_key": "BTC={{reports_btc_filter}}",
+    "depends_on": "reports_btc_filter",
+    "props": {
+      "value_col": "BehindPercent",
+      "format": "percent"
+    },
+    "notes": "Top-middle KPI: BehindCount / ActiveCount in scope."
+  },
+  {
+    "component_id": "reports_avg_days_per_migration",
+    "label": "Avg Days per Migration",
+    "type": "metric",
+    "sheet_tab": "Rpt_ReportsSummary",
+    "range": "A:E",
+    "primary_key_col": "BTC",
+    "filter_key": "BTC={{reports_btc_filter}}",
+    "depends_on": "reports_btc_filter",
+    "props": {
+      "value_col": "AvgDaysPerMigration",
+      "format": "number",
+      "decimals": 1,
+      "na_label": "N/A"
+    },
+    "notes": "Top-right KPI: avg days from upload → sign-off for completed migrations in scope."
+  },
+  {
+    "component_id": "reports_stage_performance_table",
+    "label": "Stage Performance",
+    "type": "table",
+    "sheet_tab": "Rpt_StagePerformance",
+    "range": "A:F",
+    "primary_key_col": "Stage,BTC",
+    "filter_key": "BTC={{reports_btc_filter}}",
+    "depends_on": "reports_btc_filter",
+    "props": {
+      "columns": [
+        "Stage",
+        "ActiveCount",
+        "BehindCount",
+        "BehindPercent",
+        "AvgDaysInStage"
+      ],
+      "behind_format": "percent",
+      "avg_format": "number"
+    },
+    "notes": "Per-stage performance for the 8 customer/eng-owned stages, scoped by BTC/All."
+  },
+  {
+    "component_id": "reports_cust_vs_eng_table",
+    "label": "Customer vs Eng Time",
+    "type": "table",
+    "sheet_tab": "Rpt_EngVCustTime",
+    "range": "A:C",
+    "primary_key_col": "Responsibility,BTC",
+    "filter_key": "BTC={{reports_btc_filter}}",
+    "depends_on": "reports_btc_filter",
+    "props": {
+      "title": "Customer vs Eng Time",
+      "columns": [
+        "Responsibility",
+        "BTC",
+        "Avg Days"
+      ]
+    }
+  },
+  {
+    "component_id": "reports_customer_avg_days",
+    "label": "Customer-owned Stages — Avg Days",
+    "type": "metric",
+    "sheet_tab": "Rpt_EngVCustTime",
+    "range": "",
+    "primary_key_col": "Responsibility,BTC",
+    "filter_key": "Responsibility=Customer-owned Stages;BTC={{reports_btc_filter}}",
+    "depends_on": "reports_btc_filter",
+    "props": {
+      "value_col": "Avg Days",
+      "format": "number:0"
+    }
+  },
+  {
+    "component_id": "reports_eng_avg_days",
+    "label": "Engineering-owned Stages — Avg Days",
+    "type": "metric",
+    "sheet_tab": "Rpt_EngVCustTime",
+    "range": "",
+    "primary_key_col": "Responsibility,BTC",
+    "filter_key": "Responsibility=Engineering-owned Stages;BTC={{reports_btc_filter}}",
+    "depends_on": "reports_btc_filter",
+    "props": {
+      "value_col": "Avg Days",
+      "format": "number:0"
+    }
+  },
+  {
+    "component_id": "open_github_issue_button",
+    "label": "Open GitHub Issue",
+    "type": "button",
+    "sheet_tab": "MH_View_Migrations",
+    "range": "",
+    "primary_key_col": "MigrationID",
+    "props": {
+      "action": "open_url",
+      "url_col": "GH_IssueURL"
+    },
+    "notes": "Opens the GitHub issue for the current migration."
+  },
+  {
+    "component_id": "open_churnzero_button",
+    "label": "Open CZ",
+    "type": "button",
+    "sheet_tab": "MH_View_Migrations",
+    "range": "",
+    "primary_key_col": "MigrationID",
+    "props": {
+      "action": "open_url",
+      "url_col": "ChurnZeroLink"
+    },
+    "notes": "Opens the ChurnZero link for the current migration."
+  },
+  {
+    "component_id": "mark_stage_change_button",
+    "label": "Move to Next Stage",
+    "type": "button",
+    "sheet_tab": "MH_View_Migrations",
+    "range": "",
+    "primary_key_col": "MigrationID",
+    "props": {
+      "action": "move_to_next_stage"
+    },
+    "notes": "Moves the migration to the next stage in MH_StageMap order and logs a stage_changed activity."
+  }
+]

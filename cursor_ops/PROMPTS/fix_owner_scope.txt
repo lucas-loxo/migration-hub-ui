@@ -1,0 +1,9 @@
+Fix Owner Scope (Mine-only)
+
+Task:
+- After fetching from MH_View_Migrations, filter rows client-side to the signed-in user’s email.
+
+Acceptance:
+- Tokenize OwnerEmail by comma/semicolon; case-insensitive; exact or substring match allowed.
+- Summary counts and table reflect Mine-only.
+
