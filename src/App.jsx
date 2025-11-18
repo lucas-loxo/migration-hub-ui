@@ -12,7 +12,7 @@ function AppLayout({ children }) {
     '/migrations': 'Migrations',
     '/remapping': 'Remapping',
     '/communication': 'Communication',
-    '/messaging': 'Messaging',
+    // '/messaging': 'Messaging', // Temporarily disabled
   }
   const currentPath = location.pathname.replace('#', '')
   const title = titleMap[currentPath] || 'Migration Hub'

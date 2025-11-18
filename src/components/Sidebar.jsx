@@ -4,7 +4,7 @@ import { NavLink } from 'react-router-dom'
 const links = [
   // { to: '/', label: 'Dashboard', icon: '📊' }, // Temporarily disabled
   { to: '/migrations', label: 'Migrations', icon: '🗂️' },
-  { to: '/messaging', label: 'Inbox', icon: '💬' },
+  // { to: '/messaging', label: 'Inbox', icon: '💬' }, // Temporarily disabled
   { to: '/reports', label: 'Reports', icon: '📈' },
 ]
 
