@@ -33,27 +33,32 @@ export type StatusSyncRequest = {
 /**
  * Syncs migration status to GitHub via Zapier webhook
  * This triggers the status sync flow which updates the corresponding GitHub issue
+ * Uses no-cors mode for fire-and-forget behavior to avoid CORS issues on GitHub Pages
  */
-export async function syncMigrationStatusToGitHub(request: StatusSyncRequest): Promise<{ success: boolean }> {
-  const response = await fetch('https://hooks.zapier.com/hooks/catch/25132117/u8vyvfs/', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      migrationId: request.migrationId,
-      targetStatus: request.targetStatus,
-      customerId: request.customerId,
-      currentStage: request.currentStage,
-      updatedByUserEmail: request.updatedByUserEmail,
-    }),
-  })
-
-  if (!response.ok) {
-    throw new Error(`Zapier status sync failed: ${response.status} ${response.statusText}`)
+export async function syncMigrationStatusToGitHub(request: StatusSyncRequest): Promise<void> {
+  const payload = {
+    migrationId: request.migrationId,
+    targetStatus: request.targetStatus,
+    customerId: request.customerId,
+    currentStage: request.currentStage,
+    updatedByUserEmail: request.updatedByUserEmail,
   }
 
-  return response.json()
+  try {
+    await fetch('https://hooks.zapier.com/hooks/catch/25132117/u8vyvfs/', {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(payload),
+    })
+    // Fire-and-forget: do not inspect the response, do not throw on non-200.
+    return
+  } catch (err) {
+    console.error('[syncMigrationStatusToGitHub] Zapier status sync failed', err)
+    throw new Error('Zapier status sync failed')
+  }
 }
 
 /**
