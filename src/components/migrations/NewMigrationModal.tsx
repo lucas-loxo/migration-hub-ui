@@ -43,6 +43,8 @@ const POD_OPTIONS = [
   'pod-2',
   'pod-3',
   'pod-4',
+  'pod-5',
+  'pod-6',
 ]
 
 
@@ -71,6 +73,7 @@ export default function NewMigrationModal({ open, onClose, onSuccess, existingOw
     tertiaryContactEmail: '',
     onboardingSpecialistName: '',
     onboardingSpecialistEmail: '',
+    secondPassNeeded: '',
   })
   const [owners, setOwners] = useState<string[]>(existingOwners)
   const [atsOptions, setAtsOptions] = useState<string[]>([])
@@ -162,8 +165,8 @@ export default function NewMigrationModal({ open, onClose, onSuccess, existingOw
     if (!form.customerName.trim()) {
       newErrors.customerName = 'Customer Name is required'
     }
-    if (!form.ownerEmail.trim() || !form.ownerEmail.includes('@')) {
-      newErrors.ownerEmail = 'Valid owner email is required'
+    if (!form.ownerEmail.trim()) {
+      newErrors.ownerEmail = 'Please select an owner email'
     }
     if (!form.previousATS.trim()) {
       newErrors.previousATS = 'Previous ATS is required'
@@ -222,6 +225,10 @@ export default function NewMigrationModal({ open, onClose, onSuccess, existingOw
     } else if (!form.onboardingSpecialistEmail.includes('@') || !form.onboardingSpecialistEmail.includes('.')) {
       newErrors.onboardingSpecialistEmail = 'Valid email format is required'
     }
+    // Second pass needed is required
+    if (!form.secondPassNeeded.trim()) {
+      newErrors.secondPassNeeded = 'Please select whether a second pass is needed'
+    }
 
     setErrors(newErrors)
     return Object.keys(newErrors).length === 0
@@ -277,6 +284,7 @@ export default function NewMigrationModal({ open, onClose, onSuccess, existingOw
           agency_pod: form.pod.trim() !== '--PLEASE SELECT--' ? form.pod.trim() : '',
           onboardingSpecialistName: form.onboardingSpecialistName.trim(), // Required for tracking the Onboarding Specialist responsible for the migration
           onboardingSpecialistEmail: form.onboardingSpecialistEmail.trim(), // Required for tracking the Onboarding Specialist responsible for the migration
+          secondPassNeeded: form.secondPassNeeded.trim(),
         }
         
         try {
@@ -314,6 +322,7 @@ export default function NewMigrationModal({ open, onClose, onSuccess, existingOw
           secondaryContactEmail: form.secondaryContactEmail.trim() || '',
           tertiaryContactName: form.tertiaryContactName.trim() || '',
           tertiaryContactEmail: form.tertiaryContactEmail.trim() || '',
+          secondPassNeeded: form.secondPassNeeded.trim(),
         }
         
         await postJSON('/migrations', payload)
@@ -366,6 +375,7 @@ export default function NewMigrationModal({ open, onClose, onSuccess, existingOw
         tertiaryContactEmail: '',
         onboardingSpecialistName: '',
         onboardingSpecialistEmail: '',
+        secondPassNeeded: '',
       })
       setAtsSearchQuery('')
       setErrors({})
@@ -450,21 +460,18 @@ export default function NewMigrationModal({ open, onClose, onSuccess, existingOw
               <label htmlFor="ownerEmail" className="block text-sm font-medium text-slate-700 mb-1">
                 Owner (BTC email) <span className="text-rose-500">*</span>
               </label>
-              <input
+              <select
                 id="ownerEmail"
-                type="text"
-                list="ownerEmailList"
                 value={form.ownerEmail}
                 onChange={updateField('ownerEmail')}
                 className={`w-full rounded-md border px-3 py-2 text-sm ${errors.ownerEmail ? 'border-rose-500' : 'border-slate-300'}`}
                 disabled={loading}
-                placeholder="Enter email address"
-              />
-              <datalist id="ownerEmailList">
-                {owners.map((owner) => (
-                  <option key={owner} value={owner} />
-                ))}
-              </datalist>
+              >
+                <option value="">-- Select --</option>
+                <option value="ahughes@loxo.co">ahughes@loxo.co</option>
+                <option value="bilal@loxo.co">bilal@loxo.co</option>
+                <option value="lucas@loxo.co">lucas@loxo.co</option>
+              </select>
               {errors.ownerEmail && <p className="text-xs text-rose-600 mt-1">{errors.ownerEmail}</p>}
             </div>
 
@@ -813,6 +820,24 @@ export default function NewMigrationModal({ open, onClose, onSuccess, existingOw
               </div>
             </div>
 
+            <div>
+              <label htmlFor="secondPassNeeded" className="block text-sm font-medium text-slate-700 mb-1">
+                Second pass needed? <span className="text-rose-500">*</span>
+              </label>
+              <select
+                id="secondPassNeeded"
+                value={form.secondPassNeeded}
+                onChange={updateField('secondPassNeeded')}
+                className={`w-full rounded-md border px-3 py-2 text-sm ${errors.secondPassNeeded ? 'border-rose-500' : 'border-slate-300'}`}
+                disabled={loading}
+              >
+                <option value="">-- Select --</option>
+                <option value="No">No</option>
+                <option value="Yes">Yes</option>
+              </select>
+              {errors.secondPassNeeded && <p className="text-xs text-rose-600 mt-1">{errors.secondPassNeeded}</p>}
+            </div>
+
             <div className="flex justify-end gap-3 pt-4 border-t border-slate-200">
               <button
                 type="button"
@@ -825,7 +850,7 @@ export default function NewMigrationModal({ open, onClose, onSuccess, existingOw
               <button
                 type="submit"
                 className="rounded-md bg-slate-900 text-white px-4 py-2 text-sm font-medium hover:bg-slate-800 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
-                disabled={loading || atsError || atsLoading}
+                disabled={loading || !!atsError || atsLoading}
               >
                 {loading && (
                   <svg className="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">

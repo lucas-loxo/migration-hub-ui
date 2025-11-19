@@ -45,6 +45,7 @@ export default function MyMigrationsPage() {
   const ownerMigrationsConfig = getComponentConfig('owner_migrations_table')
   const overdueMigrationsConfig = getComponentConfig('overdue_migrations')
   const nextUpToggleConfig = getComponentConfig('next_up_toggle')
+  const allMigrationsToggleConfig = getComponentConfig('all_migrations_toggle')
   
   // Parse query params safely
   const query = useMemo(() => new URLSearchParams(location.search || ''), [location.search])
@@ -255,6 +256,17 @@ export default function MyMigrationsPage() {
     navigate({ search }, { replace: true })
   }
 
+  // Handle stage filter change (used by cards)
+  const handleStageFilterChange = (stage: string) => {
+    const newStage = selectedStage === stage ? '' : stage
+    setSelectedStage(newStage)
+    const search = toSearch({ 
+      owner: ownerFilter !== 'all' ? ownerFilter : undefined,
+      stage: newStage || undefined
+    })
+    navigate({ search }, { replace: true })
+  }
+
   const hasRows = scoped.length > 0
 
   // Fixed column widths for consistent layout
@@ -268,30 +280,7 @@ export default function MyMigrationsPage() {
     },
     { 
       id: 'Stage', 
-      header: (
-        <div className="flex items-center gap-2">
-          <span>Stage</span>
-          <select
-            value={selectedStage}
-            onChange={(e) => {
-              const newStage = e.target.value
-              setSelectedStage(newStage)
-              const search = toSearch({ 
-                owner: ownerFilter !== 'all' ? ownerFilter : undefined,
-                stage: newStage || undefined
-              })
-              navigate({ search }, { replace: true })
-            }}
-            onClick={(e) => e.stopPropagation()}
-            className="rounded-md border-gray-300 text-xs"
-          >
-            <option value="">All Stages</option>
-            {STAGE_ORDER.map((s) => (
-              <option key={s} value={s}>{s}</option>
-            ))}
-          </select>
-        </div>
-      ), 
+      header: 'Stage', 
       width: '25%',
       sortable: true, 
       sortValue: (row: ViewMigration) => (STAGE_RANK[row.Stage] ?? Number.POSITIVE_INFINITY) 
@@ -398,17 +387,29 @@ export default function MyMigrationsPage() {
             </select>
           </div>
           <button type="button" onClick={() => setViewNextUp(true)} className={`rounded-md border px-3 py-1.5 text-sm ${viewNextUp ? 'bg-slate-900 text-white' : 'bg-white'}`}>{nextUpToggleConfig?.label || 'Behind'}</button>
-          <button type="button" onClick={() => setViewNextUp(false)} className={`rounded-md border px-3 py-1.5 text-sm ${!viewNextUp ? 'bg-slate-900 text-white' : 'bg-white'}`}>All My Migrations</button>
+          <button type="button" onClick={() => setViewNextUp(false)} className={`rounded-md border px-3 py-1.5 text-sm ${!viewNextUp ? 'bg-slate-900 text-white' : 'bg-white'}`}>{allMigrationsToggleConfig?.label || 'All Migrations'}</button>
         </div>
       </div>
 
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-9 gap-3">
-        {CARD_MAP.map((card) => (
-          <div key={card.stage} className="text-left bg-white rounded-xl border border-slate-200 p-4 shadow-sm hover:shadow transition">
-            <div className="text-xs text-slate-500 mb-1">{card.label}</div>
-            <div className="text-2xl font-semibold text-slate-900">{stageCounts[card.stage] || 0}</div>
-          </div>
-        ))}
+        {CARD_MAP.map((card) => {
+          const isSelected = selectedStage === card.stage
+          return (
+            <button
+              key={card.stage}
+              type="button"
+              onClick={() => handleStageFilterChange(card.stage)}
+              className={`text-left bg-white rounded-xl border p-4 shadow-sm hover:shadow transition ${
+                isSelected 
+                  ? 'border-slate-900 bg-slate-50 border-2' 
+                  : 'border-slate-200'
+              }`}
+            >
+              <div className={`text-xs mb-1 ${isSelected ? 'text-slate-900 font-medium' : 'text-slate-500'}`}>{card.label}</div>
+              <div className={`text-2xl font-semibold ${isSelected ? 'text-slate-900' : 'text-slate-900'}`}>{stageCounts[card.stage] || 0}</div>
+            </button>
+          )
+        })}
       </div>
 
       <Card className="p-4">

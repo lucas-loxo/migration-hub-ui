@@ -84,4 +84,11 @@ export function getAccessToken(): string | null {
   return token
 }
 
+export function restoreTokenFromStorage(savedToken: string, savedExpiresAt: number): void {
+  if (savedToken && savedExpiresAt && Date.now() < savedExpiresAt) {
+    token = savedToken
+    expiresAt = savedExpiresAt
+  }
+}
+
 
