@@ -769,50 +769,52 @@ export default function CustomerPage() {
           {snapshot && (
             <Card className="p-6">
               <h2 className="text-lg font-semibold text-slate-900 mb-4">Customer Notes</h2>
-              {!snapshot.customerNotes || !snapshot.customerNotes.trim() ? (
-                <div className="text-sm text-slate-400">No customer notes added.</div>
-              ) : (
-                <div className="space-y-3 mb-4">
-                  {(() => {
-                    const lines = snapshot.customerNotes.split(/\r?\n/).map(l => l.trim()).filter(Boolean)
-                    return lines.map((line, index) => {
-                      // Match pattern: [ISO_TIMESTAMP] <email> note text (new format)
-                      // or [ISO_TIMESTAMP] note text (old format without email)
-                      const match = line.match(/^\[([^\]]+)\]\s*(?:<(.+?)>)?\s*(.*)$/)
-                      if (match) {
-                        const [, iso, email, text] = match
-                        try {
-                          const localTime = new Date(iso).toLocaleString()
-                          const displayEmail = email || 'unknown'
-                          return (
-                            <div key={index} className="border-b border-slate-100 pb-2 last:border-b-0 last:pb-0">
-                              <div className="text-xs text-slate-500 mb-1 flex justify-between">
-                                <span>{localTime}</span>
-                                <span>— {displayEmail}</span>
+              <div className="max-h-64 overflow-y-auto mb-4">
+                {!snapshot.customerNotes || !snapshot.customerNotes.trim() ? (
+                  <div className="text-sm text-slate-400">No customer notes added.</div>
+                ) : (
+                  <div className="space-y-3">
+                    {(() => {
+                      const lines = snapshot.customerNotes.split(/\r?\n/).map(l => l.trim()).filter(Boolean)
+                      return lines.map((line, index) => {
+                        // Match pattern: [ISO_TIMESTAMP] <email> note text (new format)
+                        // or [ISO_TIMESTAMP] note text (old format without email)
+                        const match = line.match(/^\[([^\]]+)\]\s*(?:<(.+?)>)?\s*(.*)$/)
+                        if (match) {
+                          const [, iso, email, text] = match
+                          try {
+                            const localTime = new Date(iso).toLocaleString()
+                            const displayEmail = email || 'unknown'
+                            return (
+                              <div key={index} className="border-b border-slate-100 pb-2 last:border-b-0 last:pb-0">
+                                <div className="text-xs text-slate-500 mb-1 flex justify-between">
+                                  <span>{localTime}</span>
+                                  <span>— {displayEmail}</span>
+                                </div>
+                                <div className="text-sm text-slate-900 whitespace-pre-wrap">{text}</div>
                               </div>
-                              <div className="text-sm text-slate-900 whitespace-pre-wrap">{text}</div>
-                            </div>
-                          )
-                        } catch (e) {
-                          // If date parsing fails, render as plain text
+                            )
+                          } catch (e) {
+                            // If date parsing fails, render as plain text
+                            return (
+                              <div key={index} className="border-b border-slate-100 pb-2 last:border-b-0 last:pb-0">
+                                <div className="text-sm text-slate-900 whitespace-pre-wrap">{line}</div>
+                              </div>
+                            )
+                          }
+                        } else {
+                          // Old format without timestamp - render as plain text
                           return (
                             <div key={index} className="border-b border-slate-100 pb-2 last:border-b-0 last:pb-0">
                               <div className="text-sm text-slate-900 whitespace-pre-wrap">{line}</div>
                             </div>
                           )
                         }
-                      } else {
-                        // Old format without timestamp - render as plain text
-                        return (
-                          <div key={index} className="border-b border-slate-100 pb-2 last:border-b-0 last:pb-0">
-                            <div className="text-sm text-slate-900 whitespace-pre-wrap">{line}</div>
-                          </div>
-                        )
-                      }
-                    })
-                  })()}
-                </div>
-              )}
+                      })
+                    })()}
+                  </div>
+                )}
+              </div>
               {isEditor && (
                 <div className="mt-4">
                   <textarea
