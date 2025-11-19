@@ -2,6 +2,36 @@ import React from 'react'
 import Card from '../Card.jsx'
 import type { MigrationSnapshot, CustomerProfile } from '../../lib/sheetsCustomers'
 
+// Helper function to get text color class for stage
+function getStageTextColor(stage: string | undefined): string {
+  if (!stage) return 'text-blue-700'
+  
+  const normalizedStage = stage.trim()
+  
+  switch (normalizedStage) {
+    case 'Sending Kickoff Email':
+    case 'Sending Import Map Email':
+    case 'Sending Validation Email':
+    case 'Sending Final Confirm Email':
+    case 'Sending Sign-Off Email':
+      return 'text-purple-600'
+    case 'Waiting on Data Upload':
+    case 'Waiting on Customer Import Map':
+    case 'Waiting on Validation Requests':
+    case 'Waiting on Final Confirmation':
+      return 'text-orange-600'
+    case 'Waiting on Eng Import Map':
+    case 'Waiting on Data Import':
+    case 'Waiting on Eng Validation':
+    case 'Waiting on Duplicate Merge':
+      return 'text-blue-600'
+    case 'Complete':
+      return 'text-green-600'
+    default:
+      return 'text-blue-700' // Default blue color
+  }
+}
+
 type TopSummaryCardProps = {
   profile: CustomerProfile | null
   snapshot: MigrationSnapshot | null
@@ -39,7 +69,7 @@ export default function TopSummaryCard({ profile, snapshot }: TopSummaryCardProp
       </div>
 
       <div className="flex flex-wrap items-center gap-3">
-        <span className="inline-flex items-center px-3 py-1 rounded-md text-sm font-medium bg-blue-50 text-blue-700">
+        <span className={`inline-flex items-center px-3 py-1 rounded-md text-sm font-medium bg-blue-50 ${getStageTextColor(stage)}`}>
           Current Stage: {stage}
         </span>
         <span className="inline-flex items-center px-3 py-1 rounded-md text-sm font-medium bg-slate-50 text-slate-700">

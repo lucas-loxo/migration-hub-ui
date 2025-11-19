@@ -205,9 +205,9 @@ ${data.additionalDetails || "N/A"}
 
 ${data.payingUsers || "N/A"}
 
-### Intake Notes
+### Customer Notes
 
-${data.intakeNotes || "N/A"}
+${data.customerNotes || data.customer_notes || "N/A"}
 
 ### Migration Details
 
@@ -386,7 +386,8 @@ function writeToSheets(customerId, data, stage, issueNumber, issueUrl) {
       'Pod': data.pod || '',
       'ChurnZeroLink': data.churn0Link || '',
       '2nd_Pass_Needed': data.secondPassNeeded || 'No',
-      'Attachments': data.attachments || ''
+      'Attachments': data.attachments || '',
+      'CustomerNotes': data.customerNotes || data.customer_notes || ''
     };
     
     for (let i = 0; i < headers.length; i++) {

@@ -49,17 +49,38 @@ export async function initGoogle({ clientId, scopes }: InitArgs) {
   gisLoaded = true
 }
 
-export function signIn(prompt = 'consent'): Promise<{ access_token: string; expires_in: number }> {
+export function signIn(prompt = 'consent'): Promise<{ access_token: string; expires_in: number; email?: string }> {
   return new Promise((resolve, reject) => {
     if (!tokenClient) return reject(new Error('Token client not initialized'))
+    
     // @ts-ignore
-    tokenClient.callback = (resp: any) => {
+    tokenClient.callback = async (resp: any) => {
       if (resp?.error) return reject(new Error(resp.error))
       if (resp?.access_token) {
         token = resp.access_token
         const expiresIn = Number(resp.expires_in || 0)
         expiresAt = Date.now() + expiresIn * 1000 - 5000
-        resolve({ access_token: token!, expires_in: expiresIn })
+        
+        // Fetch user email using the access token
+        let email: string | undefined = undefined
+        try {
+          const r = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
+            headers: { Authorization: `Bearer ${token}` }
+          })
+          if (r.ok) {
+            const u = await r.json()
+            if (u?.email) {
+              email = u.email
+              // Store email in localStorage
+              localStorage.setItem('mh_user_email', email)
+            }
+          }
+        } catch (e) {
+          // If userinfo call fails, email will remain undefined
+          console.warn('[google.ts] Failed to fetch user email:', e)
+        }
+        
+        resolve({ access_token: token!, expires_in: expiresIn, email })
       } else {
         reject(new Error('No access token'))
       }

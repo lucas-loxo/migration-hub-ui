@@ -59,7 +59,7 @@ export default function NewMigrationModal({ open, onClose, onSuccess, existingOw
     dataMethod: '--PLEASE SELECT--',
     accessInstructions: '',
     additionalDetails: '',
-    intakeNotes: '',
+    customerNotes: '',
     payingUsers: '',
     tier: '--PLEASE SELECT--',
     pod: '--PLEASE SELECT--',
@@ -276,7 +276,7 @@ export default function NewMigrationModal({ open, onClose, onSuccess, existingOw
           secondary_contact_email: form.secondaryContactEmail.trim(),
           tertiary_contact_name: form.tertiaryContactName.trim(),
           tertiary_contact_email: form.tertiaryContactEmail.trim(),
-          intake_notes: form.intakeNotes.trim(),
+          customer_notes: form.customerNotes.trim(),
           data_access_method: form.dataMethod.trim() !== '--PLEASE SELECT--' ? form.dataMethod.trim() : '',
           customer_data_access_instructions: form.accessInstructions.trim(),
           additional_details: form.additionalDetails.trim(),
@@ -312,7 +312,7 @@ export default function NewMigrationModal({ open, onClose, onSuccess, existingOw
           dataMethod: form.dataMethod.trim(),
           accessInstructions: form.accessInstructions.trim() || '',
           additionalDetails: form.additionalDetails.trim() || '',
-          intakeNotes: form.intakeNotes.trim() || '',
+          customerNotes: form.customerNotes.trim() || '',
           payingUsers: form.payingUsers.trim(),
           tier: form.tier.trim(),
           pod: form.pod.trim(),
@@ -364,7 +364,7 @@ export default function NewMigrationModal({ open, onClose, onSuccess, existingOw
         dataMethod: '--PLEASE SELECT--',
         accessInstructions: '',
         additionalDetails: '',
-        intakeNotes: '',
+        customerNotes: '',
         payingUsers: '',
         tier: '--PLEASE SELECT--',
         pod: '--PLEASE SELECT--',
@@ -779,13 +779,13 @@ export default function NewMigrationModal({ open, onClose, onSuccess, existingOw
             </div>
 
             <div>
-              <label htmlFor="intakeNotes" className="block text-sm font-medium text-slate-700 mb-1">
-                Intake Notes <span className="text-slate-400">(optional)</span>
+              <label htmlFor="customerNotes" className="block text-sm font-medium text-slate-700 mb-1">
+                Customer Notes <span className="text-slate-400">(optional)</span>
               </label>
               <textarea
-                id="intakeNotes"
-                value={form.intakeNotes}
-                onChange={updateField('intakeNotes')}
+                id="customerNotes"
+                value={form.customerNotes}
+                onChange={updateField('customerNotes')}
                 rows={3}
                 className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
                 disabled={loading}

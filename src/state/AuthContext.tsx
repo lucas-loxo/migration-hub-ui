@@ -18,6 +18,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       try {
         await initGoogle({ clientId: GOOGLE_OAUTH_CLIENT_ID, scopes: GOOGLE_SCOPES })
         
+        // Try to restore email from localStorage first
+        const savedEmail = localStorage.getItem('mh_user_email')
+        if (savedEmail) {
+          setUserEmail(savedEmail)
+        }
+        
         // Try to restore from localStorage first
         const savedAuth = localStorage.getItem(AUTH_STORAGE_KEY)
         if (savedAuth) {
@@ -29,17 +35,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
               const tk = getAccessToken() || undefined
               if (tk) {
                 setToken(tk)
+                // Use saved email from auth storage, or fall back to mh_user_email
                 if (savedUserEmail) {
                   setUserEmail(savedUserEmail)
-                } else {
-                  // Fetch user email if not saved
-                  try {
-                    const r = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', { headers: { Authorization: `Bearer ${tk}` } })
-                    if (r.ok) {
-                      const u = await r.json()
-                      if (u?.email) setUserEmail(u.email)
-                    }
-                  } catch {}
+                } else if (savedEmail) {
+                  setUserEmail(savedEmail)
                 }
                 setLoading(false)
                 return
@@ -54,15 +54,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         // Fallback to checking if token exists in google.ts (for backward compatibility)
         const tk = getAccessToken() || undefined
         setToken(tk)
-        if (tk && tk.trim().length > 0) {
-          try {
-            const r = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', { headers: { Authorization: `Bearer ${tk}` } })
-            if (r.ok) {
-              const u = await r.json()
-              if (u?.email) setUserEmail(u.email)
-            }
-          } catch {}
-        }
       } catch (e) {
         console.error(e)
       } finally {
@@ -77,18 +68,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const accessToken = resp.access_token
       const expiresAt = Date.now() + resp.expires_in * 1000 - 5000
       setToken(accessToken)
-      let email: string | undefined = undefined
-      if (accessToken && accessToken.trim().length > 0) {
-        try {
-          const r = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', { headers: { Authorization: `Bearer ${accessToken}` } })
-          if (r.ok) {
-            const u = await r.json()
-            if (u?.email) {
-              email = u.email
-              setUserEmail(u.email)
-            }
-          }
-        } catch {}
+      // Use email from sign-in response
+      const email = resp.email
+      if (email) {
+        setUserEmail(email)
+        // Email is already stored in localStorage by signIn()
       }
       // Save to localStorage
       localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify({

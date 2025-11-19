@@ -45,8 +45,8 @@ export default function CustomerPage() {
   const [snapshot, setSnapshot] = useState<MigrationSnapshot | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const [intakeNotes, setIntakeNotes] = useState<string>('')
-  const [savingIntakeNotes, setSavingIntakeNotes] = useState(false)
+  const [newCustomerNote, setNewCustomerNote] = useState<string>('')
+  const [savingCustomerNotes, setSavingCustomerNotes] = useState(false)
   const { userEmail, token } = useAuth()
   const { isEditor } = usePermissions()
   
@@ -72,6 +72,24 @@ export default function CustomerPage() {
   const [selectedGitHubStatus, setSelectedGitHubStatus] = useState<string>('Gathering Requirements')
   const [syncingStatus, setSyncingStatus] = useState(false)
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null)
+  
+  // Customer Details edit mode state
+  const [isEditingDetails, setIsEditingDetails] = useState(false)
+  const [editingDetails, setEditingDetails] = useState<{
+    previousATS?: string
+    payingUsers?: string
+    customerSegment?: string
+    dataMethod?: string
+    pod?: string
+    tier?: string
+    primaryContactName?: string
+    primaryContactEmail?: string
+    secondaryContactName?: string
+    secondaryContactEmail?: string
+    tertiaryContactName?: string
+    tertiaryContactEmail?: string
+  }>({})
+  const [savingDetails, setSavingDetails] = useState(false)
 
   useEffect(() => {
     // If migrationId is provided, use it; otherwise fall back to customerId for backward compatibility
@@ -115,7 +133,6 @@ export default function CustomerPage() {
         setProfile(profileData)
         setSnapshot(snapshotData)
         if (snapshotData) {
-          setIntakeNotes(snapshotData.intakeNotes || '')
           // Initialize GitHub status dropdown to current status from GH_Status column in sheet
           const currentStatus = snapshotData.ghStatus || 'Gathering Requirements'
           setSelectedGitHubStatus(currentStatus)
@@ -225,7 +242,6 @@ export default function CustomerPage() {
                     .then((snapshotData) => {
                       setSnapshot(snapshotData)
                       if (snapshotData) {
-                        setIntakeNotes(snapshotData.intakeNotes || '')
                         if (snapshotData.CustomerID) {
                           return fetchCustomerProfile(snapshotData.CustomerID)
                         }
@@ -249,9 +265,6 @@ export default function CustomerPage() {
                     .then(([profileData, snapshotData]) => {
                       setProfile(profileData)
                       setSnapshot(snapshotData)
-                      if (snapshotData) {
-                        setIntakeNotes(snapshotData.intakeNotes || '')
-                      }
                       if (!profileData && !snapshotData) {
                         setError('Customer not found')
                       }
@@ -619,9 +632,6 @@ export default function CustomerPage() {
                     const profileData = await fetchCustomerProfile(snapshotData.CustomerID)
                     setProfile(profileData)
                   }
-                  if (snapshotData) {
-                    setIntakeNotes(snapshotData.intakeNotes || '')
-                  }
                 } else if (customerId) {
                   const [profileData, snapshotData] = await Promise.all([
                     fetchCustomerProfile(customerId),
@@ -629,9 +639,6 @@ export default function CustomerPage() {
                   ])
                   setProfile(profileData)
                   setSnapshot(snapshotData)
-                  if (snapshotData) {
-                    setIntakeNotes(snapshotData.intakeNotes || '')
-                  }
                 }
               } catch (e: any) {
                 console.error('[CustomerPage] Error refreshing data:', e)
@@ -758,10 +765,178 @@ export default function CustomerPage() {
             </Card>
           )}
 
+          {/* Customer Notes Card */}
+          {snapshot && (
+            <Card className="p-6">
+              <h2 className="text-lg font-semibold text-slate-900 mb-4">Customer Notes</h2>
+              {!snapshot.customerNotes || !snapshot.customerNotes.trim() ? (
+                <div className="text-sm text-slate-400">No customer notes added.</div>
+              ) : (
+                <div className="space-y-3 mb-4">
+                  {(() => {
+                    const lines = snapshot.customerNotes.split(/\r?\n/).map(l => l.trim()).filter(Boolean)
+                    return lines.map((line, index) => {
+                      // Match pattern: [ISO_TIMESTAMP] <email> note text (new format)
+                      // or [ISO_TIMESTAMP] note text (old format without email)
+                      const match = line.match(/^\[([^\]]+)\]\s*(?:<(.+?)>)?\s*(.*)$/)
+                      if (match) {
+                        const [, iso, email, text] = match
+                        try {
+                          const localTime = new Date(iso).toLocaleString()
+                          const displayEmail = email || 'unknown'
+                          return (
+                            <div key={index} className="border-b border-slate-100 pb-2 last:border-b-0 last:pb-0">
+                              <div className="text-xs text-slate-500 mb-1 flex justify-between">
+                                <span>{localTime}</span>
+                                <span>— {displayEmail}</span>
+                              </div>
+                              <div className="text-sm text-slate-900 whitespace-pre-wrap">{text}</div>
+                            </div>
+                          )
+                        } catch (e) {
+                          // If date parsing fails, render as plain text
+                          return (
+                            <div key={index} className="border-b border-slate-100 pb-2 last:border-b-0 last:pb-0">
+                              <div className="text-sm text-slate-900 whitespace-pre-wrap">{line}</div>
+                            </div>
+                          )
+                        }
+                      } else {
+                        // Old format without timestamp - render as plain text
+                        return (
+                          <div key={index} className="border-b border-slate-100 pb-2 last:border-b-0 last:pb-0">
+                            <div className="text-sm text-slate-900 whitespace-pre-wrap">{line}</div>
+                          </div>
+                        )
+                      }
+                    })
+                  })()}
+                </div>
+              )}
+              {isEditor && (
+                <div className="mt-4">
+                  <textarea
+                    value={newCustomerNote}
+                    onChange={(e) => setNewCustomerNote(e.target.value)}
+                    disabled={!isEditor || savingCustomerNotes || !snapshot?.MigrationID}
+                    rows={1}
+                    className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm resize-y disabled:bg-slate-50 disabled:text-slate-500"
+                    placeholder={isEditor ? "Enter customer notes..." : "Read-only access. Contact Lucas if you need edit permissions."}
+                    title={!isEditor ? "Read-only access. Contact Lucas if you need edit permissions." : undefined}
+                    onKeyDown={(e) => {
+                      // Allow Enter to submit if Shift+Enter is not pressed
+                      if (e.key === 'Enter' && !e.shiftKey) {
+                        e.preventDefault()
+                        // Trigger Add Note button click
+                        const addButton = e.currentTarget.parentElement?.querySelector('button[type="button"]')
+                        if (addButton) {
+                          (addButton as HTMLButtonElement).click()
+                        }
+                      }
+                    }}
+                  />
+                  <button
+                    type="button"
+                    onClick={async () => {
+                      if (!snapshot?.MigrationID || !isEditor) {
+                        if (!isEditor) {
+                          setToast({ message: 'Read-only access. Contact Lucas if you need edit permissions.', type: 'error' })
+                        }
+                        return
+                      }
+                      
+                      const noteText = newCustomerNote.trim()
+                      if (!noteText) return
+                      
+                      setSavingCustomerNotes(true)
+                      try {
+                        // Build new entry with timestamp and email
+                        const nowIso = new Date().toISOString()
+                        const email = userEmail ?? 'unknown'
+                        const newEntry = `[${nowIso}] <${email}> ${noteText}`
+                        
+                        // Append to existing notes
+                        const existing = snapshot.customerNotes || ''
+                        const combined = existing ? `${existing}\n${newEntry}` : newEntry
+                        
+                        // Save to Sheets
+                        await updateMigrationFieldByHeader(snapshot.MigrationID, 'CustomerNotes', combined)
+                        
+                        // Refresh snapshot to get updated value
+                        const identifier = migrationId || customerId
+                        if (identifier) {
+                          let updatedSnapshot: MigrationSnapshot | null = null
+                          if (migrationId) {
+                            updatedSnapshot = await fetchMigrationSnapshotByMigrationId(migrationId)
+                          } else if (customerId) {
+                            updatedSnapshot = await fetchMigrationSnapshot(customerId)
+                          }
+                          if (updatedSnapshot) {
+                            setSnapshot(updatedSnapshot)
+                            setNewCustomerNote('') // Clear the input
+                          }
+                        }
+                      } catch (e: any) {
+                        console.error('[CustomerPage] Error saving customer notes:', e)
+                        setToast({ message: `Failed to save customer notes: ${e?.message || 'Unknown error'}`, type: 'error' })
+                      } finally {
+                        setSavingCustomerNotes(false)
+                      }
+                    }}
+                    disabled={!isEditor || savingCustomerNotes || !snapshot?.MigrationID || !newCustomerNote.trim()}
+                    className="mt-2 px-4 py-2 rounded-md bg-slate-900 text-white text-sm font-medium hover:bg-slate-800 transition disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {savingCustomerNotes ? 'Adding...' : 'Add Note'}
+                  </button>
+                  {savingCustomerNotes && (
+                    <div className="text-xs text-slate-500 mt-1">Saving...</div>
+                  )}
+                </div>
+              )}
+            </Card>
+          )}
+
           {/* Merged Customer Details Card */}
           {snapshot && (
             <Card className="p-6">
-              <h2 className="text-lg font-semibold text-slate-900 mb-4">Customer Details</h2>
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-lg font-semibold text-slate-900">Customer Details</h2>
+                {!isEditingDetails && (
+                  <button
+                    onClick={() => {
+                      if (!isEditor) {
+                        setToast({ message: 'Read-only access. Contact Lucas if you need edit permissions.', type: 'error' })
+                        return
+                      }
+                      // Initialize edit state with current values
+                      setEditingDetails({
+                        previousATS: snapshot.previousATS || '',
+                        payingUsers: snapshot.payingUsers?.toString() || '',
+                        customerSegment: snapshot.customerSegment || '',
+                        dataMethod: snapshot.dataMethod || '',
+                        pod: snapshot.pod || '',
+                        tier: snapshot.tier || '',
+                        primaryContactName: snapshot.primaryContactName || '',
+                        primaryContactEmail: snapshot.primaryContactEmail || '',
+                        secondaryContactName: snapshot.secondaryContactName || '',
+                        secondaryContactEmail: snapshot.secondaryContactEmail || '',
+                        tertiaryContactName: snapshot.tertiaryContactName || '',
+                        tertiaryContactEmail: snapshot.tertiaryContactEmail || '',
+                      })
+                      setIsEditingDetails(true)
+                    }}
+                    disabled={!isEditor}
+                    title={!isEditor ? "Read-only access. Contact Lucas if you need edit permissions." : undefined}
+                    className={`px-3 py-1.5 rounded-md text-sm font-medium transition ${
+                      isEditor
+                        ? 'bg-slate-900 text-white hover:bg-slate-800'
+                        : 'bg-slate-100 text-slate-400 cursor-not-allowed'
+                    }`}
+                  >
+                    Edit
+                  </button>
+                )}
+              </div>
               <div className="grid grid-cols-1 gap-4 max-h-96 overflow-y-auto">
                 {/* Status at top */}
                 <div>
@@ -788,27 +963,87 @@ export default function CustomerPage() {
                 
                 <div>
                   <div className="text-sm text-slate-500 mb-1">Previous ATS</div>
-                  <div className="text-sm text-slate-900">{snapshot.previousATS || '—'}</div>
+                  {isEditingDetails ? (
+                    <input
+                      type="text"
+                      value={editingDetails.previousATS || ''}
+                      onChange={(e) => setEditingDetails({ ...editingDetails, previousATS: e.target.value })}
+                      className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
+                      disabled={savingDetails}
+                    />
+                  ) : (
+                    <div className="text-sm text-slate-900">{snapshot.previousATS || '—'}</div>
+                  )}
                 </div>
                 <div>
                   <div className="text-sm text-slate-500 mb-1">Users</div>
-                  <div className="text-sm text-slate-900">{snapshot.payingUsers ?? '—'}</div>
+                  {isEditingDetails ? (
+                    <input
+                      type="text"
+                      value={editingDetails.payingUsers || ''}
+                      onChange={(e) => setEditingDetails({ ...editingDetails, payingUsers: e.target.value })}
+                      className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
+                      disabled={savingDetails}
+                    />
+                  ) : (
+                    <div className="text-sm text-slate-900">{snapshot.payingUsers ?? '—'}</div>
+                  )}
                 </div>
                 <div>
                   <div className="text-sm text-slate-500 mb-1">Segment</div>
-                  <div className="text-sm text-slate-900">{snapshot.customerSegment || '—'}</div>
+                  {isEditingDetails ? (
+                    <input
+                      type="text"
+                      value={editingDetails.customerSegment || ''}
+                      onChange={(e) => setEditingDetails({ ...editingDetails, customerSegment: e.target.value })}
+                      className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
+                      disabled={savingDetails}
+                    />
+                  ) : (
+                    <div className="text-sm text-slate-900">{snapshot.customerSegment || '—'}</div>
+                  )}
                 </div>
                 <div>
                   <div className="text-sm text-slate-500 mb-1">Upload Method</div>
-                  <div className="text-sm text-slate-900">{snapshot.dataMethod || '—'}</div>
+                  {isEditingDetails ? (
+                    <input
+                      type="text"
+                      value={editingDetails.dataMethod || ''}
+                      onChange={(e) => setEditingDetails({ ...editingDetails, dataMethod: e.target.value })}
+                      className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
+                      disabled={savingDetails}
+                    />
+                  ) : (
+                    <div className="text-sm text-slate-900">{snapshot.dataMethod || '—'}</div>
+                  )}
                 </div>
                 <div>
                   <div className="text-sm text-slate-500 mb-1">Pod</div>
-                  <div className="text-sm text-slate-900">{snapshot.pod || '—'}</div>
+                  {isEditingDetails ? (
+                    <input
+                      type="text"
+                      value={editingDetails.pod || ''}
+                      onChange={(e) => setEditingDetails({ ...editingDetails, pod: e.target.value })}
+                      className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
+                      disabled={savingDetails}
+                    />
+                  ) : (
+                    <div className="text-sm text-slate-900">{snapshot.pod || '—'}</div>
+                  )}
                 </div>
                 <div>
                   <div className="text-sm text-slate-500 mb-1">Tier</div>
-                  <div className="text-sm text-slate-900">{snapshot.tier || '—'}</div>
+                  {isEditingDetails ? (
+                    <input
+                      type="text"
+                      value={editingDetails.tier || ''}
+                      onChange={(e) => setEditingDetails({ ...editingDetails, tier: e.target.value })}
+                      className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
+                      disabled={savingDetails}
+                    />
+                  ) : (
+                    <div className="text-sm text-slate-900">{snapshot.tier || '—'}</div>
+                  )}
                 </div>
                 
                 {/* Attachments */}
@@ -844,99 +1079,211 @@ export default function CustomerPage() {
                 {/* Contact Fields */}
                 <div>
                   <div className="text-sm text-slate-500 mb-1">Primary Contact Name</div>
-                  <div className="text-sm text-slate-900">{snapshot.primaryContactName || '—'}</div>
+                  {isEditingDetails ? (
+                    <input
+                      type="text"
+                      value={editingDetails.primaryContactName || ''}
+                      onChange={(e) => setEditingDetails({ ...editingDetails, primaryContactName: e.target.value })}
+                      className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
+                      disabled={savingDetails}
+                    />
+                  ) : (
+                    <div className="text-sm text-slate-900">{snapshot.primaryContactName || '—'}</div>
+                  )}
                 </div>
                 <div>
                   <div className="text-sm text-slate-500 mb-1">Primary Contact Email</div>
-                  <div className="text-sm text-slate-900">
-                    {snapshot.primaryContactEmail ? (
-                      <a href={`mailto:${snapshot.primaryContactEmail}`} className="text-blue-600 hover:underline">
-                        {snapshot.primaryContactEmail}
-                      </a>
-                    ) : (
-                      '—'
-                    )}
-                  </div>
+                  {isEditingDetails ? (
+                    <input
+                      type="email"
+                      value={editingDetails.primaryContactEmail || ''}
+                      onChange={(e) => setEditingDetails({ ...editingDetails, primaryContactEmail: e.target.value })}
+                      className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
+                      disabled={savingDetails}
+                    />
+                  ) : (
+                    <div className="text-sm text-slate-900">
+                      {snapshot.primaryContactEmail ? (
+                        <a href={`mailto:${snapshot.primaryContactEmail}`} className="text-blue-600 hover:underline">
+                          {snapshot.primaryContactEmail}
+                        </a>
+                      ) : (
+                        '—'
+                      )}
+                    </div>
+                  )}
                 </div>
                 <div>
                   <div className="text-sm text-slate-500 mb-1">Secondary Contact Name</div>
-                  <div className="text-sm text-slate-900">{snapshot.secondaryContactName || '—'}</div>
+                  {isEditingDetails ? (
+                    <input
+                      type="text"
+                      value={editingDetails.secondaryContactName || ''}
+                      onChange={(e) => setEditingDetails({ ...editingDetails, secondaryContactName: e.target.value })}
+                      className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
+                      disabled={savingDetails}
+                    />
+                  ) : (
+                    <div className="text-sm text-slate-900">{snapshot.secondaryContactName || '—'}</div>
+                  )}
                 </div>
                 <div>
                   <div className="text-sm text-slate-500 mb-1">Secondary Contact Email</div>
-                  <div className="text-sm text-slate-900">
-                    {snapshot.secondaryContactEmail ? (
-                      <a href={`mailto:${snapshot.secondaryContactEmail}`} className="text-blue-600 hover:underline">
-                        {snapshot.secondaryContactEmail}
-                      </a>
-                    ) : (
-                      '—'
-                    )}
-                  </div>
+                  {isEditingDetails ? (
+                    <input
+                      type="email"
+                      value={editingDetails.secondaryContactEmail || ''}
+                      onChange={(e) => setEditingDetails({ ...editingDetails, secondaryContactEmail: e.target.value })}
+                      className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
+                      disabled={savingDetails}
+                    />
+                  ) : (
+                    <div className="text-sm text-slate-900">
+                      {snapshot.secondaryContactEmail ? (
+                        <a href={`mailto:${snapshot.secondaryContactEmail}`} className="text-blue-600 hover:underline">
+                          {snapshot.secondaryContactEmail}
+                        </a>
+                      ) : (
+                        '—'
+                      )}
+                    </div>
+                  )}
                 </div>
                 <div>
                   <div className="text-sm text-slate-500 mb-1">Tertiary Contact Name</div>
-                  <div className="text-sm text-slate-900">{snapshot.tertiaryContactName || '—'}</div>
+                  {isEditingDetails ? (
+                    <input
+                      type="text"
+                      value={editingDetails.tertiaryContactName || ''}
+                      onChange={(e) => setEditingDetails({ ...editingDetails, tertiaryContactName: e.target.value })}
+                      className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
+                      disabled={savingDetails}
+                    />
+                  ) : (
+                    <div className="text-sm text-slate-900">{snapshot.tertiaryContactName || '—'}</div>
+                  )}
                 </div>
                 <div>
                   <div className="text-sm text-slate-500 mb-1">Tertiary Contact Email</div>
-                  <div className="text-sm text-slate-900">
-                    {snapshot.tertiaryContactEmail ? (
-                      <a href={`mailto:${snapshot.tertiaryContactEmail}`} className="text-blue-600 hover:underline">
-                        {snapshot.tertiaryContactEmail}
-                      </a>
-                    ) : (
-                      '—'
-                    )}
-                  </div>
-                </div>
-                
-                {/* Editable Intake Notes */}
-                <div>
-                  <div className="text-sm text-slate-500 mb-1">Intake Notes</div>
-                  <textarea
-                    value={intakeNotes}
-                    onChange={(e) => setIntakeNotes(e.target.value)}
-                    onBlur={async () => {
-                      if (!snapshot?.MigrationID || !isEditor) {
-                        if (!isEditor) {
-                          setToast({ message: 'Read-only access. Contact Lucas if you need edit permissions.', type: 'error' })
-                          setIntakeNotes(snapshot.intakeNotes || '')
-                        }
-                        return
-                      }
-                      const newValue = intakeNotes.trim()
-                      const currentValue = snapshot.intakeNotes || ''
-                      if (newValue === currentValue) return
-                      
-                      setSavingIntakeNotes(true)
-                      try {
-                        await updateMigrationFieldByHeader(snapshot.MigrationID, 'IntakeNotes', newValue)
-                        // Refresh snapshot to get updated value
-                        const updatedSnapshot = await fetchMigrationSnapshot(customerId || '')
-                        if (updatedSnapshot) {
-                          setSnapshot(updatedSnapshot)
-                          setIntakeNotes(updatedSnapshot.intakeNotes || '')
-                        }
-                      } catch (e: any) {
-                        console.error('[CustomerPage] Error saving intake notes:', e)
-                        alert(`Failed to save intake notes: ${e?.message || 'Unknown error'}`)
-                        // Revert to original value
-                        setIntakeNotes(snapshot.intakeNotes || '')
-                      } finally {
-                        setSavingIntakeNotes(false)
-                      }
-                    }}
-                    disabled={!isEditor || savingIntakeNotes || !snapshot?.MigrationID}
-                    rows={4}
-                    className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm disabled:bg-slate-50 disabled:text-slate-500"
-                    placeholder={isEditor ? "Enter intake notes..." : "Read-only access. Contact Lucas if you need edit permissions."}
-                    title={!isEditor ? "Read-only access. Contact Lucas if you need edit permissions." : undefined}
-                  />
-                  {savingIntakeNotes && (
-                    <div className="text-xs text-slate-500 mt-1">Saving...</div>
+                  {isEditingDetails ? (
+                    <input
+                      type="email"
+                      value={editingDetails.tertiaryContactEmail || ''}
+                      onChange={(e) => setEditingDetails({ ...editingDetails, tertiaryContactEmail: e.target.value })}
+                      className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
+                      disabled={savingDetails}
+                    />
+                  ) : (
+                    <div className="text-sm text-slate-900">
+                      {snapshot.tertiaryContactEmail ? (
+                        <a href={`mailto:${snapshot.tertiaryContactEmail}`} className="text-blue-600 hover:underline">
+                          {snapshot.tertiaryContactEmail}
+                        </a>
+                      ) : (
+                        '—'
+                      )}
+                    </div>
                   )}
                 </div>
+                
+                
+                {/* Save/Cancel buttons for edit mode */}
+                {isEditingDetails && (
+                  <div className="flex gap-3 justify-end pt-4 border-t border-slate-200">
+                    <button
+                      onClick={() => {
+                        // Cancel: revert to original values and exit edit mode
+                        setIsEditingDetails(false)
+                        setEditingDetails({})
+                      }}
+                      disabled={savingDetails}
+                      className="px-4 py-2 rounded-md border border-slate-300 text-slate-700 text-sm font-medium hover:bg-slate-50 transition disabled:opacity-50"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      onClick={async () => {
+                        if (!snapshot?.MigrationID || !isEditor || savingDetails) return
+                        
+                        setSavingDetails(true)
+                        try {
+                          // Map field names to sheet header names (try both variants for contact fields)
+                          const fieldMappings: Record<string, string[]> = {
+                            previousATS: ['PreviousATS'],
+                            payingUsers: ['PayingUsers'],
+                            customerSegment: ['CustomerSegment'],
+                            dataMethod: ['DataMethod'],
+                            pod: ['Pod'],
+                            tier: ['Tier'],
+                            primaryContactName: ['Primary Contact Name', 'PrimaryContactName'],
+                            primaryContactEmail: ['Primary Contact Email', 'PrimaryContactEmail'],
+                            secondaryContactName: ['Secondary Contact Name', 'SecondaryContactName'],
+                            secondaryContactEmail: ['Secondary Contact Email', 'SecondaryContactEmail'],
+                            tertiaryContactName: ['Tertiary Contact Name', 'TertiaryContactName'],
+                            tertiaryContactEmail: ['Tertiary Contact Email', 'TertiaryContactEmail'],
+                          }
+                          
+                          // Update each field that has changed
+                          const updatePromises = Object.entries(editingDetails)
+                            .filter(([key, value]) => {
+                              const currentValue = snapshot[key as keyof MigrationSnapshot]
+                              return value !== (currentValue?.toString() || '')
+                            })
+                            .map(async ([key, value]) => {
+                              const headerVariants = fieldMappings[key]
+                              if (!headerVariants) return
+                              
+                              // Try each variant until one succeeds
+                              let lastError: Error | null = null
+                              for (const headerName of headerVariants) {
+                                try {
+                                  await updateMigrationFieldByHeader(snapshot.MigrationID!, headerName, value || '', token)
+                                  return // Success, exit loop
+                                } catch (e: any) {
+                                  lastError = e
+                                  // If it's not a "column not found" error, rethrow
+                                  if (!e?.message?.includes('not found') && !e?.message?.includes('Column')) {
+                                    throw e
+                                  }
+                                }
+                              }
+                              // If all variants failed, throw the last error
+                              if (lastError) throw lastError
+                            })
+                          
+                          await Promise.all(updatePromises)
+                          
+                          // Refresh snapshot to get updated values
+                          const identifier = migrationId || customerId
+                          if (identifier) {
+                            let updatedSnapshot: MigrationSnapshot | null = null
+                            if (migrationId) {
+                              updatedSnapshot = await fetchMigrationSnapshotByMigrationId(migrationId)
+                            } else if (customerId) {
+                              updatedSnapshot = await fetchMigrationSnapshot(customerId)
+                            }
+                            if (updatedSnapshot) {
+                              setSnapshot(updatedSnapshot)
+                            }
+                          }
+                          
+                          setIsEditingDetails(false)
+                          setEditingDetails({})
+                          setToast({ message: 'Customer details updated successfully.', type: 'success' })
+                        } catch (e: any) {
+                          console.error('[CustomerPage] Error saving customer details:', e)
+                          setToast({ message: `Failed to save: ${e?.message || 'Unknown error'}`, type: 'error' })
+                        } finally {
+                          setSavingDetails(false)
+                        }
+                      }}
+                      disabled={savingDetails || !snapshot?.MigrationID}
+                      className="px-4 py-2 rounded-md bg-slate-900 text-white text-sm font-medium hover:bg-slate-800 transition disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      {savingDetails ? 'Saving...' : 'Save'}
+                    </button>
+                  </div>
+                )}
               </div>
             </Card>
           )}

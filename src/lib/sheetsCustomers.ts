@@ -16,7 +16,7 @@ export type MigrationSnapshot = {
   payingUsers?: number | string
   customerSegment?: string
   dataMethod?: string
-  intakeNotes?: string
+  customerNotes?: string
   pod?: string
   tier?: string
   churnZeroLink?: string
@@ -137,7 +137,7 @@ export async function fetchMigrationSnapshot(customerId: string): Promise<Migrat
     
     // Optional fields - find them if present
     // Try both with spaces and without spaces for contact fields
-    const optionalFields = ['PreviousATS', 'PayingUsers', 'CustomerSegment', 'DataMethod', 'IntakeNotes', 'Pod', 'Tier', 'ChurnZeroLink', 'MigrationID', 'GH_IssueNumber', 'Attachments']
+    const optionalFields = ['PreviousATS', 'PayingUsers', 'CustomerSegment', 'DataMethod', 'CustomerNotes', 'Pod', 'Tier', 'ChurnZeroLink', 'MigrationID', 'GH_IssueNumber', 'Attachments']
     for (const field of optionalFields) {
       try {
         idx[field] = byHeader(grid, field)
@@ -196,7 +196,7 @@ export async function fetchMigrationSnapshot(customerId: string): Promise<Migrat
         const payingUsers = payingUsersStr ? (Number.isFinite(Number(payingUsersStr)) ? Number(payingUsersStr) : payingUsersStr) : undefined
         const customerSegment = idx['CustomerSegment'] >= 0 ? getValue(row, idx['CustomerSegment']) : undefined
         const dataMethod = idx['DataMethod'] >= 0 ? getValue(row, idx['DataMethod']) : undefined
-        const intakeNotes = idx['IntakeNotes'] >= 0 ? getValue(row, idx['IntakeNotes']) : undefined
+        const customerNotes = idx['CustomerNotes'] >= 0 ? getValue(row, idx['CustomerNotes']) : undefined
         const pod = idx['Pod'] >= 0 ? getValue(row, idx['Pod']) : undefined
         const tier = idx['Tier'] >= 0 ? getValue(row, idx['Tier']) : undefined
         const churnZeroLink = idx['ChurnZeroLink'] >= 0 ? getValue(row, idx['ChurnZeroLink']) : undefined
@@ -222,7 +222,7 @@ export async function fetchMigrationSnapshot(customerId: string): Promise<Migrat
           payingUsers: payingUsers,
           customerSegment: customerSegment || undefined,
           dataMethod: dataMethod || undefined,
-          intakeNotes: intakeNotes || undefined,
+          customerNotes: customerNotes || undefined,
           pod: pod || undefined,
           tier: tier || undefined,
           churnZeroLink: churnZeroLink || undefined,
@@ -291,7 +291,7 @@ export async function fetchMigrationSnapshotByMigrationId(migrationId: string): 
       idx['GH_Status'] = -1
     }
     // Optional fields
-    const optionalFields = ['PreviousATS', 'PayingUsers', 'CustomerSegment', 'DataMethod', 'IntakeNotes', 'Pod', 'Tier', 'ChurnZeroLink', 'GH_IssueNumber', 'Attachments']
+    const optionalFields = ['PreviousATS', 'PayingUsers', 'CustomerSegment', 'DataMethod', 'CustomerNotes', 'Pod', 'Tier', 'ChurnZeroLink', 'GH_IssueNumber', 'Attachments']
     for (const field of optionalFields) {
       try {
         idx[field] = byHeader(grid, field)
@@ -351,7 +351,7 @@ export async function fetchMigrationSnapshotByMigrationId(migrationId: string): 
         const payingUsers = payingUsersStr ? (Number.isFinite(Number(payingUsersStr)) ? Number(payingUsersStr) : payingUsersStr) : undefined
         const customerSegment = idx['CustomerSegment'] >= 0 ? getValue(row, idx['CustomerSegment']) : undefined
         const dataMethod = idx['DataMethod'] >= 0 ? getValue(row, idx['DataMethod']) : undefined
-        const intakeNotes = idx['IntakeNotes'] >= 0 ? getValue(row, idx['IntakeNotes']) : undefined
+        const customerNotes = idx['CustomerNotes'] >= 0 ? getValue(row, idx['CustomerNotes']) : undefined
         const pod = idx['Pod'] >= 0 ? getValue(row, idx['Pod']) : undefined
         const tier = idx['Tier'] >= 0 ? getValue(row, idx['Tier']) : undefined
         const churnZeroLink = idx['ChurnZeroLink'] >= 0 ? getValue(row, idx['ChurnZeroLink']) : undefined
@@ -377,7 +377,7 @@ export async function fetchMigrationSnapshotByMigrationId(migrationId: string): 
           payingUsers: payingUsers,
           customerSegment: customerSegment || undefined,
           dataMethod: dataMethod || undefined,
-          intakeNotes: intakeNotes || undefined,
+          customerNotes: customerNotes || undefined,
           pod: pod || undefined,
           tier: tier || undefined,
           churnZeroLink: churnZeroLink || undefined,
