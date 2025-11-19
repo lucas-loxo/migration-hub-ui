@@ -82,7 +82,7 @@ export default function ActivityFeed({ migrationId }: ActivityFeedProps) {
           <div className="text-xs text-slate-400 mt-1">Activity feed will appear here</div>
         </div>
       ) : (
-        <div className="space-y-4">
+        <div className="max-h-64 overflow-y-auto space-y-4">
           {activities.map((activity, index) => (
             <div key={activity.eventId || index} className="p-4 border border-slate-200 rounded-lg bg-slate-50">
               <div className="text-sm text-slate-900 font-medium">{formatActivitySummary(activity)}</div>

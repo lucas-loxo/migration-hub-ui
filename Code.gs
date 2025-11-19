@@ -385,7 +385,8 @@ function writeToSheets(customerId, data, stage, issueNumber, issueUrl) {
       'Tier': data.tier || '',
       'Pod': data.pod || '',
       'ChurnZeroLink': data.churn0Link || '',
-      '2nd_Pass_Needed': data.secondPassNeeded || 'No'
+      '2nd_Pass_Needed': data.secondPassNeeded || 'No',
+      'Attachments': data.attachments || ''
     };
     
     for (let i = 0; i < headers.length; i++) {

@@ -14,6 +14,29 @@ import { requestWriteWithAi } from '../lib/ai'
 import { getAccessToken } from '../lib/google'
 import { getAllEmailThreads, getMessagesForThread } from '../lib/emails'
 
+// Helper function to get Tailwind classes for GitHub status pill
+function getGithubStatusClasses(status: string | undefined): string {
+  if (!status) return 'bg-slate-100 border-slate-300'
+  
+  const normalizedStatus = status.trim()
+  
+  switch (normalizedStatus) {
+    case 'In Progress':
+      return 'bg-blue-100 border-blue-500'
+    case 'Blocked':
+      return 'bg-red-100 border-red-500'
+    case 'Ready to Work':
+      return 'bg-green-100 border-green-500'
+    case 'Done':
+      return 'bg-green-100 border-green-500'
+    case 'Waiting Migration Team':
+      return 'bg-orange-100 border-orange-500'
+    case 'Gathering Requirements':
+    default:
+      return 'bg-slate-100 border-slate-300'
+  }
+}
+
 export default function CustomerPage() {
   // Support both /migrations/:migrationId and /customer/:customerId routes
   // migrationId is the canonical identifier (M-XXXX format); customerId is for backward compatibility
@@ -625,7 +648,7 @@ export default function CustomerPage() {
                 {/* Read-only current status display - reads from GH_Status column in MH_View_Migrations */}
                 <div className="flex-1">
                   <div className="text-sm text-slate-500 mb-1">Current Status</div>
-                  <div className="inline-flex items-center px-3 py-1.5 rounded-md bg-slate-100 text-slate-900 text-sm font-medium">
+                  <div className={`inline-flex items-center px-3 py-1.5 rounded-md border text-slate-900 text-sm font-medium ${getGithubStatusClasses(snapshot.ghStatus)}`}>
                     {snapshot.ghStatus || '—'}
                   </div>
                 </div>
@@ -786,6 +809,36 @@ export default function CustomerPage() {
                 <div>
                   <div className="text-sm text-slate-500 mb-1">Tier</div>
                   <div className="text-sm text-slate-900">{snapshot.tier || '—'}</div>
+                </div>
+                
+                {/* Attachments */}
+                <div>
+                  <div className="text-sm text-slate-500 mb-1">Attachments</div>
+                  {!snapshot.attachments || !snapshot.attachments.trim() ? (
+                    <div className="text-sm text-slate-400">No attachments added.</div>
+                  ) : (
+                    <div className="space-y-1">
+                      {(() => {
+                        // Split by newlines first, then by commas, trim, and filter empty
+                        const urls = snapshot.attachments
+                          .split('\n')
+                          .flatMap(line => line.split(','))
+                          .map(url => url.trim())
+                          .filter(url => url.length > 0)
+                        return urls.map((url, index) => (
+                          <a
+                            key={index}
+                            href={url}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="text-sm text-blue-600 hover:underline block"
+                          >
+                            {url}
+                          </a>
+                        ))
+                      })()}
+                    </div>
+                  )}
                 </div>
                 
                 {/* Contact Fields */}

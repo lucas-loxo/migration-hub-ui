@@ -74,6 +74,7 @@ export default function NewMigrationModal({ open, onClose, onSuccess, existingOw
     onboardingSpecialistName: '',
     onboardingSpecialistEmail: '',
     secondPassNeeded: '',
+    attachments: '',
   })
   const [owners, setOwners] = useState<string[]>(existingOwners)
   const [atsOptions, setAtsOptions] = useState<string[]>([])
@@ -285,6 +286,7 @@ export default function NewMigrationModal({ open, onClose, onSuccess, existingOw
           onboardingSpecialistName: form.onboardingSpecialistName.trim(), // Required for tracking the Onboarding Specialist responsible for the migration
           onboardingSpecialistEmail: form.onboardingSpecialistEmail.trim(), // Required for tracking the Onboarding Specialist responsible for the migration
           secondPassNeeded: form.secondPassNeeded.trim(),
+          attachments: form.attachments.trim(),
         }
         
         try {
@@ -323,6 +325,7 @@ export default function NewMigrationModal({ open, onClose, onSuccess, existingOw
           tertiaryContactName: form.tertiaryContactName.trim() || '',
           tertiaryContactEmail: form.tertiaryContactEmail.trim() || '',
           secondPassNeeded: form.secondPassNeeded.trim(),
+          attachments: form.attachments.trim(),
         }
         
         await postJSON('/migrations', payload)
@@ -376,6 +379,7 @@ export default function NewMigrationModal({ open, onClose, onSuccess, existingOw
         onboardingSpecialistName: '',
         onboardingSpecialistEmail: '',
         secondPassNeeded: '',
+        attachments: '',
       })
       setAtsSearchQuery('')
       setErrors({})
@@ -836,6 +840,21 @@ export default function NewMigrationModal({ open, onClose, onSuccess, existingOw
                 <option value="Yes">Yes</option>
               </select>
               {errors.secondPassNeeded && <p className="text-xs text-rose-600 mt-1">{errors.secondPassNeeded}</p>}
+            </div>
+
+            <div>
+              <label htmlFor="attachments" className="block text-sm font-medium text-slate-700 mb-1">
+                Attachments <span className="text-slate-400">(optional)</span>
+              </label>
+              <textarea
+                id="attachments"
+                value={form.attachments}
+                onChange={updateField('attachments')}
+                rows={3}
+                className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
+                disabled={loading}
+                placeholder="Paste one or more links, separated by commas or new lines"
+              />
             </div>
 
             <div className="flex justify-end gap-3 pt-4 border-t border-slate-200">

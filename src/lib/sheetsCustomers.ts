@@ -28,6 +28,7 @@ export type MigrationSnapshot = {
   secondaryContactEmail?: string
   tertiaryContactName?: string
   tertiaryContactEmail?: string
+  attachments?: string
 }
 
 export type CustomerProfile = {
@@ -136,7 +137,7 @@ export async function fetchMigrationSnapshot(customerId: string): Promise<Migrat
     
     // Optional fields - find them if present
     // Try both with spaces and without spaces for contact fields
-    const optionalFields = ['PreviousATS', 'PayingUsers', 'CustomerSegment', 'DataMethod', 'IntakeNotes', 'Pod', 'Tier', 'ChurnZeroLink', 'MigrationID', 'GH_IssueNumber']
+    const optionalFields = ['PreviousATS', 'PayingUsers', 'CustomerSegment', 'DataMethod', 'IntakeNotes', 'Pod', 'Tier', 'ChurnZeroLink', 'MigrationID', 'GH_IssueNumber', 'Attachments']
     for (const field of optionalFields) {
       try {
         idx[field] = byHeader(grid, field)
@@ -290,7 +291,7 @@ export async function fetchMigrationSnapshotByMigrationId(migrationId: string): 
       idx['GH_Status'] = -1
     }
     // Optional fields
-    const optionalFields = ['PreviousATS', 'PayingUsers', 'CustomerSegment', 'DataMethod', 'IntakeNotes', 'Pod', 'Tier', 'ChurnZeroLink', 'GH_IssueNumber']
+    const optionalFields = ['PreviousATS', 'PayingUsers', 'CustomerSegment', 'DataMethod', 'IntakeNotes', 'Pod', 'Tier', 'ChurnZeroLink', 'GH_IssueNumber', 'Attachments']
     for (const field of optionalFields) {
       try {
         idx[field] = byHeader(grid, field)
@@ -362,6 +363,7 @@ export async function fetchMigrationSnapshotByMigrationId(migrationId: string): 
         const secondaryContactEmail = idx['Secondary Contact Email'] >= 0 ? getValue(row, idx['Secondary Contact Email']) : undefined
         const tertiaryContactName = idx['Tertiary Contact Name'] >= 0 ? getValue(row, idx['Tertiary Contact Name']) : undefined
         const tertiaryContactEmail = idx['Tertiary Contact Email'] >= 0 ? getValue(row, idx['Tertiary Contact Email']) : undefined
+        const attachments = idx['Attachments'] >= 0 ? getValue(row, idx['Attachments']) : undefined
 
         return {
           CustomerID: customerId,
@@ -388,6 +390,7 @@ export async function fetchMigrationSnapshotByMigrationId(migrationId: string): 
           secondaryContactEmail: secondaryContactEmail || undefined,
           tertiaryContactName: tertiaryContactName || undefined,
           tertiaryContactEmail: tertiaryContactEmail || undefined,
+          attachments: attachments || undefined,
         }
       }
     }
