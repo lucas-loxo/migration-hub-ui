@@ -5,6 +5,7 @@ import TopSummaryCard from '../components/customer/TopSummaryCard'
 import NextActionPanel from '../components/customer/NextActionPanel'
 import ActivityFeed from '../components/customer/ActivityFeed'
 import DetailsSidebar from '../components/customer/DetailsSidebar'
+import StageTimeline from '../components/customer/StageTimeline'
 import Card from '../components/Card.jsx'
 import { syncMigrationStatusToGitHub, getLatestAiDraft } from '../lib/apiClient'
 import Toast from '../components/Toast.jsx'
@@ -896,6 +897,40 @@ export default function CustomerPage() {
                 </div>
               )}
             </Card>
+          )}
+
+          {/* Stage Timeline Card */}
+          {snapshot && snapshot.MigrationID && (
+            <StageTimeline
+              snapshot={snapshot}
+              onRefresh={() => {
+                // Reload data
+                const loadData = async () => {
+                  const identifier = migrationId || customerId
+                  if (!identifier) return
+                  try {
+                    if (migrationId) {
+                      const snapshotData = await fetchMigrationSnapshotByMigrationId(migrationId)
+                      setSnapshot(snapshotData)
+                      if (snapshotData?.CustomerID) {
+                        const profileData = await fetchCustomerProfile(snapshotData.CustomerID)
+                        setProfile(profileData)
+                      }
+                    } else if (customerId) {
+                      const [profileData, snapshotData] = await Promise.all([
+                        fetchCustomerProfile(customerId),
+                        fetchMigrationSnapshot(customerId),
+                      ])
+                      setProfile(profileData)
+                      setSnapshot(snapshotData)
+                    }
+                  } catch (e: any) {
+                    console.error('[CustomerPage] Error refreshing data:', e)
+                  }
+                }
+                loadData()
+              }}
+            />
           )}
 
           {/* Merged Customer Details Card */}
